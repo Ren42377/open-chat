@@ -103,7 +103,7 @@ fun OpenChatApp(
     controller: FakeStateController,
     initialDestination: OpenChatDestination = OpenChatDestination.CONVERSATION,
 ) {
-    val snapshot by controller.snapshot.collectAsState()
+    val snapshot by controller.state.collectAsState()
     var currentDestination by remember { mutableStateOf(initialDestination) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
@@ -136,16 +136,14 @@ fun OpenChatApp(
                             .fillMaxWidth()
                             .statusBarsPadding(),
                     ) {
-                        val activeConversation = snapshot.conversations.find {
-                            it.id == snapshot.selectedConversationId
-                        }
+                        val activeConversation = snapshot.activeConversation
                         val headerTitle = if (currentDestination == OpenChatDestination.CONVERSATION) {
                             activeConversation?.title ?: currentDestination.title
                         } else {
                             currentDestination.title
                         }
                         val headerSubtitle = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                            "${snapshot.selectedModel.displayName} | ${snapshot.activeMode.label} | ${snapshot.subscriptionTier.label}"
+                            "${snapshot.selectedModelSlug} | ${snapshot.activeConversationMode.label} | ${snapshot.subscriptionTier.label}"
                         } else {
                             "${currentDestination.subtitle} (${currentDestination.deepLinkPath})"
                         }
@@ -160,7 +158,7 @@ fun OpenChatApp(
                                 currentDestination = OpenChatDestination.EXPERIMENT_INSPECTOR
                             },
                             trailingActionIcon = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                                OpenChatIcons.Compose
+                                OpenChatIcons.Pencil
                             } else {
                                 OpenChatIcons.ChatBubble
                             },
@@ -171,7 +169,7 @@ fun OpenChatApp(
                             },
                             onTrailingAction = {
                                 if (currentDestination == OpenChatDestination.CONVERSATION) {
-                                    controller.startNewConversation()
+                                    controller.startNewChat()
                                 } else {
                                     currentDestination = OpenChatDestination.CONVERSATION
                                 }
@@ -188,8 +186,8 @@ fun OpenChatApp(
                             },
                         )
 
-                        AnimatedVisibility(visible = snapshot.statusBannerMessage != null) {
-                            val bannerText = snapshot.statusBannerMessage.orEmpty()
+                        AnimatedVisibility(visible = snapshot.lastStatusBanner != null) {
+                            val bannerText = snapshot.lastStatusBanner.orEmpty()
                             Surface(
                                 color = MaterialTheme.colorScheme.secondaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -208,9 +206,9 @@ fun OpenChatApp(
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.weight(1f),
                                     )
-                                    IconButton(onClick = { controller.dismissStatusBanner() }) {
+                                    IconButton(onClick = { controller.clearStatusBanner() }) {
                                         DsIcon(
-                                            drawableRes = OpenChatIcons.Checkmark,
+                                            drawableRes = OpenChatIcons.StopFill,
                                             contentDescription = "Dismiss notification",
                                             size = 16.dp,
                                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
