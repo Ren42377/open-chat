@@ -6,7 +6,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: decompile-${{ github.ref }}
@@ -35,7 +35,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download apk-src --pattern "*.apk" --output target.apk --clobber
+          if gh release download apk-src --pattern "target.apk" --output target.apk --clobber 2>/dev/null; then
+            echo "Downloaded single target.apk asset."
+          elif gh release download apk-src --pattern "*.apk" --output target.apk --clobber 2>/dev/null; then
+            echo "Downloaded APK asset."
+          else
+            echo "Reassembling target.apk from chunked release assets..."
+            mkdir -p apk_parts
+            gh release download apk-src --pattern "target.apk.part*" --dir apk_parts --clobber
+            cat apk_parts/target.apk.part* > target.apk
+            gh release upload apk-src target.apk --clobber
+            for part in apk_parts/target.apk.part*; do
+              part_name=$(basename "$part")
+              gh release delete-asset apk-src "$part_name" --yes || true
+            done
+            rm -rf apk_parts
+          fi
           ls -lh target.apk
 
       - name: Download pinned Apktool and decode manifest and resources
