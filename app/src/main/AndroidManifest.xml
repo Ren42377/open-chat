@@ -16,6 +16,35 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="openchat"
+                    android:host="app" />
+                <data android:pathPrefix="/c/" />
+                <data android:pathPrefix="/voice" />
+                <data android:pathPrefix="/sketch" />
+                <data android:pathPrefix="/library" />
+                <data android:pathPrefix="/discovery-hub" />
+                <data android:pathPrefix="/gpts" />
+                <data android:pathPrefix="/g/" />
+                <data android:pathPrefix="/spaces" />
+                <data android:pathPrefix="/scheduled" />
+                <data android:pathPrefix="/tasks" />
+                <data android:pathPrefix="/settings" />
+                <data android:pathPrefix="/subscription" />
+                <data android:pathPrefix="/codex" />
+                <data android:pathPrefix="/dots" />
+                <data android:pathPrefix="/calpico" />
+                <data android:pathPrefix="/finances" />
+                <data android:pathPrefix="/shopping" />
+                <data android:pathPrefix="/football" />
+                <data android:pathPrefix="/parentalcontrols" />
+                <data android:pathPrefix="/experiments" />
+            </intent-filter>
         </activity>
     </application>
 

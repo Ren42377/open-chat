@@ -1,0 +1,986 @@
+package io.openchat.data.mock
+
+/**
+ * Clean-room local mock repository providing deterministic seed data for all
+ * reconstructed screens, hidden/beta flows, and feature flags in `_decompiled_ref/`.
+ */
+object LocalMockRepository {
+
+    val defaultFeatureFlags: List<FeatureFlag> = listOf(
+        FeatureFlag(
+            key = "feature_codex_remote_next",
+            title = "Codex Cloud & Remote Next (Slingshot)",
+            category = "Agents & Coding",
+            description = "Enables Codex Cloud environments, desktop QR pairing, remote threads, and companion pets.",
+            sourceRef = "defpackage/m1v.java, defpackage/bmp0.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_codex_companion_pets",
+            title = "Codex Companion Pets",
+            category = "Agents & Coding",
+            description = "Enables animated workspace companions (Codex, Dewey, Fireball, Hoots, Null Signal, Rocky, Seedy, Stacky, BSOD).",
+            sourceRef = "res/values/strings.xml#L1528-L1591",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_orbit_tibro_dots",
+            title = "Orbit / Tibro Always-On Dots",
+            category = "Agents & Coding",
+            description = "Enables TibroPrimary (Dots, Ideas, You), custom agent rules, dot voice calls, and avatar customization.",
+            sourceRef = "com/openai/feature/orbit/landing/ui/a.java, defpackage/wbv.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_calpico_social_chat",
+            title = "Calpico (Open Chat with Friends)",
+            category = "Social & Collaboration",
+            description = "Enables direct messages, group chats with magic links, assistant auto-response controls, and fun facts.",
+            sourceRef = "defpackage/uyu.java, defpackage/e0v.java, defpackage/i0v.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_artifacts_sites_pages",
+            title = "Artifact Library, Pages & Sites Lite",
+            category = "Library & Workspace",
+            description = "Enables Artifact Library tabs (Images, Files, Folders, Pages, Sites), analytics, and environment secrets.",
+            sourceRef = "com/openai/navigation/destinations/a.java..i.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_snorlax_projects_spaces",
+            title = "Spaces & Projects (Snorlax)",
+            category = "Library & Workspace",
+            description = "Enables project workspaces, custom instructions, project sources library, and collaborator invitations.",
+            sourceRef = "defpackage/mhv.java, defpackage/ezv0.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_scheduled_tasks_automations",
+            title = "Scheduled Tasks & Automations",
+            category = "Productivity",
+            description = "Enables recurring tasks, goals, condition triggers, and shared task links.",
+            sourceRef = "AndroidManifest.xml (/scheduled, /tasks), strings.xml#L423-L606",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_variants_in_stream",
+            title = "Variants In Stream Comparison",
+            category = "Conversation",
+            description = "Enables side-by-side response variants and preference selection inside conversation streams.",
+            sourceRef = "defpackage/pov.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_reasoning_effort_gauge",
+            title = "Reasoning Effort Gauge",
+            category = "Conversation",
+            description = "Enables interactive effort level selector (Low, Medium, High, Extra High, Max, Ultra).",
+            sourceRef = "res/drawable/effort_gauge_needle.xml, strings.xml#L1627-L1632",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_realtime_voice_orbit_call",
+            title = "Realtime Voice & Live Camera",
+            category = "Voice & Multimodal",
+            description = "Enables realtime voice orb, live camera vision, screen sharing, background sessions, and Voice Debug panel.",
+            sourceRef = "OrbitVoiceCallActivity, defpackage/opv.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_sketch_image_editor",
+            title = "Sketch & Image Annotation",
+            category = "Voice & Multimodal",
+            description = "Enables interactive canvas drawing, region selection, background removal, and aspect ratio presets.",
+            sourceRef = "ImageEditActivity, defpackage/l3v.java (Sketch)",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_plugins_bazaar_connectors",
+            title = "Plugins, Skills & Bazaar Connectors",
+            category = "Integrations",
+            description = "Enables Apps & Plugins directory, skill inspection, and granular connector permissions.",
+            sourceRef = "defpackage/yxu.java, defpackage/ygv.java, defpackage/pxu.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_cloud_browser_1password",
+            title = "Cloud Browser & Saved Logins",
+            category = "Integrations",
+            description = "Enables remote Cloud Browser handoff, saved website credentials, and 1Password autofill integration.",
+            sourceRef = "defpackage/e1v.java, strings.xml#L620-L682",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_finances_dashboard",
+            title = "Finances & Net Worth Hub",
+            category = "Verticals & Commerce",
+            description = "Enables linked bank/investment accounts, spending categories, and financial memories.",
+            sourceRef = "defpackage/f7v.java, strings.xml#L3206-L3269",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_wallet_card_approval",
+            title = "Wallet & In-Chat Checkout Approval",
+            category = "Verticals & Commerce",
+            description = "Enables Wallet card scanner, payment method management, and purchase approval sheets.",
+            sourceRef = "WalletVgsCardScanActivity, defpackage/xpv.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_shopping_virtual_try_on",
+            title = "Shopping Hub & Virtual Try-On",
+            category = "Verticals & Commerce",
+            description = "Enables product comparison cards, pricing breakdowns, and selfie/full-body virtual try-on.",
+            sourceRef = "defpackage/skv.java, strings.xml#L7732-L7752",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_live_sports_football",
+            title = "Live Sports & Conference Scores",
+            category = "Verticals & Commerce",
+            description = "Enables live scoreboards and team standings on the /football deep-link vertical.",
+            sourceRef = "AndroidManifest.xml (/football), strings.xml#L6785-L6792",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_locked_chats_pin",
+            title = "Locked Chats & Account PIN",
+            category = "Privacy & Safety",
+            description = "Enables PIN-protected hidden conversations with isolated memory.",
+            sourceRef = "defpackage/nbv.java, defpackage/qbv.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_lockdown_daybreak_security",
+            title = "Lockdown Mode & Daybreak Cyber Access",
+            category = "Privacy & Safety",
+            description = "Enables strict prompt-injection Lockdown Mode and Daybreak authorized security research controls.",
+            sourceRef = "strings.xml#L2220-L2273, L5973-L5980",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_parental_controls_u18",
+            title = "Parental Controls, Quiet Hours & U18 Graduation",
+            category = "Privacy & Safety",
+            description = "Enables family linking, Quiet Hours, Study Hours, and U18 age verification flows.",
+            sourceRef = "defpackage/hpz.java, defpackage/lpz.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_trusted_contact_safety",
+            title = "Trusted Contact Safety Network",
+            category = "Privacy & Safety",
+            description = "Enables Trusted Contact invitation, confirmation, decline, and support alert sheets.",
+            sourceRef = "defpackage/ad01.java, ed01.java, kd01.java, oe01.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_improved_memory_summary",
+            title = "Improved Memory Summary & Sources",
+            category = "Personalization",
+            description = "Enables synthesized memory biography, source attribution, and inline memory corrections.",
+            sourceRef = "defpackage/cpv.java, defpackage/rcv.java",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_ads_transparency_controls",
+            title = "Ads Controls & Transparency Center",
+            category = "Privacy & Safety",
+            description = "Enables ad history, ad topics/interests management, and ad-free plan choices.",
+            sourceRef = "strings.xml#L53-L166",
+            enabled = true,
+        ),
+        FeatureFlag(
+            key = "feature_clinician_health_mode",
+            title = "Clinician Mode & Health Sync",
+            category = "Verticals & Commerce",
+            description = "Enables Open Chat for Clinicians mode toggle and health data source management.",
+            sourceRef = "strings.xml#L1185-L1187, L3081-L3083",
+            enabled = true,
+        ),
+    )
+
+    val models: List<ModelOption> = listOf(
+        ModelOption(
+            slug = "gpt-5.4",
+            name = "OpenChat 5.4 Frontier",
+            subtitle = "Newest and most advanced model for reasoning, coding, and multimodal tasks.",
+            badge = "FRONTIER",
+            supportsEffort = true,
+            requiresPlusOrHigher = false,
+        ),
+        ModelOption(
+            slug = "gpt-5.5-pro",
+            name = "OpenChat 5.5 Pro Extended",
+            subtitle = "Pro level intelligence with extended compute and deep research synthesis.",
+            badge = "PRO",
+            supportsEffort = true,
+            requiresPlusOrHigher = true,
+        ),
+        ModelOption(
+            slug = "gpt-4o",
+            name = "GPT-4o",
+            subtitle = "Fast multimodal model, great for everyday writing, vision, and voice.",
+            badge = "FAST",
+            supportsEffort = false,
+            requiresPlusOrHigher = false,
+        ),
+        ModelOption(
+            slug = "gpt-4o-mini",
+            name = "Default (GPT-4o mini)",
+            subtitle = "Our fastest model, great for most everyday tasks.",
+            badge = "LIGHT",
+            supportsEffort = false,
+            requiresPlusOrHigher = false,
+        ),
+        ModelOption(
+            slug = "dynamic-router",
+            name = "Dynamic",
+            subtitle = "Use the right model for my request automatically.",
+            badge = "AUTO",
+            supportsEffort = true,
+            requiresPlusOrHigher = false,
+        ),
+        ModelOption(
+            slug = "astra-internal",
+            name = "Astra Canary (Internal)",
+            subtitle = "Internal dogfood reasoning model with Daybreak and Valdi visual renderer.",
+            badge = "ALPHA",
+            supportsEffort = true,
+            requiresPlusOrHigher = true,
+            isInternal = true,
+        ),
+    )
+
+    val initialConversations: List<ConversationThread> = listOf(
+        ConversationThread(
+            id = "conv-architecture",
+            title = "Kotlin Multiplatform Compose Architecture",
+            category = "Today",
+            updatedRelative = "2m ago",
+            modelSlug = "gpt-5.4",
+            isPinned = true,
+            spaceId = "space-android",
+            branchedFromTitle = "Jetpack Navigation 3 Migration",
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-1",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "10:14 AM",
+                    text = "Can you design a clean-room state holder pattern for a multi-surface Android app with offline mock simulation and spring transitions?",
+                ),
+                ChatMessage(
+                    id = "msg-2",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "10:14 AM",
+                    modelSlug = "gpt-5.4",
+                    thinkingSeconds = 6,
+                    reasoningSteps = listOf(
+                        "Inspected Material 3 spatial spring tokens (damping = 0.9, stiffness = 700.0).",
+                        "Structured unidirectional StateFlow controller with per-screen UI state overrides.",
+                        "Verified zero network dependencies and deterministic seed snapshots.",
+                    ),
+                    text = "Here is a production-ready unidirectional state architecture using `StateFlow` and spatial spring animations. You can switch between **Success**, **Loading**, **Empty**, and **Error** states at runtime without restarting the activity.",
+                    codeSnippets = listOf(
+                        CodeSnippet(
+                            language = "kotlin",
+                            filename = "FakeStateController.kt",
+                            code = """
+                                class FakeStateController {
+                                    private val _uiState = MutableStateFlow(UiSimState.SUCCESS)
+                                    val uiState: StateFlow<UiSimState> = _uiState.asStateFlow()
+
+                                    fun selectState(target: UiSimState) {
+                                        _uiState.value = target
+                                    }
+                                }
+                            """.trimIndent(),
+                            output = "BUILD SUCCESSFUL in 1s (0 warnings)",
+                        ),
+                    ),
+                    citations = listOf(
+                        CitationSource(
+                            title = "Android Architecture Guide: UI Layer & State Holders",
+                            domain = "developer.android.com",
+                            snippet = "Expose immutable StateFlow from state holders to guarantee deterministic Compose recomposition.",
+                        ),
+                        CitationSource(
+                            title = "Material Design 3 Expressive Motion Specification",
+                            domain = "m3.material.io",
+                            snippet = "Default spatial spring uses dampingRatio 0.9 and stiffness 700.0 for responsive container transitions.",
+                        ),
+                    ),
+                    toolSteps = listOf(
+                        ToolExecutionStep(
+                            toolName = "Search in workspace",
+                            status = "Completed",
+                            durationMs = 142,
+                            summary = "Listed files in app/src/main/java/io/openchat",
+                        ),
+                        ToolExecutionStep(
+                            toolName = "Code verification",
+                            status = "Completed",
+                            durationMs = 310,
+                            summary = "Exit code 0",
+                        ),
+                    ),
+                    variants = listOf(
+                        MessageVariant(
+                            optionNumber = 1,
+                            label = "Option 1: Concise StateFlow Pattern",
+                            content = "Here is a production-ready unidirectional state architecture using `StateFlow` and spatial spring animations. You can switch between **Success**, **Loading**, **Empty**, and **Error** states at runtime without restarting the activity.",
+                            thinkingDurationSeconds = 6,
+                        ),
+                        MessageVariant(
+                            optionNumber = 2,
+                            label = "Option 2: Detailed Multi-Module Breakdown",
+                            content = "For larger apps, isolate `FakeStateController` inside `:core:testing-mock` and expose scoped flows per navigation graph (`Conversation`, `Library`, `Codex`, `Orbit`) so each feature module can be previewed independently.",
+                            thinkingDurationSeconds = 9,
+                        ),
+                    ),
+                    reaction = "Thumbs Up",
+                ),
+            ),
+        ),
+        ConversationThread(
+            id = "conv-deep-research",
+            title = "Solid-State Battery Electrolyte Synthesis",
+            category = "Today",
+            updatedRelative = "1h ago",
+            modelSlug = "gpt-5.5-pro",
+            isPinned = true,
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-201",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "09:02 AM",
+                    text = "Compare argyrodite Li6PS5Cl vs garnet LLZO ionic conductivity at 25C and summarize dendrite suppression strategies.",
+                ),
+                ChatMessage(
+                    id = "msg-202",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "09:03 AM",
+                    modelSlug = "gpt-5.5-pro",
+                    thinkingSeconds = 18,
+                    reasoningSteps = listOf(
+                        "Cross-referenced 24 peer-reviewed solid-state battery papers.",
+                        "Compiled room-temperature conductivity vs interfacial impedance metrics.",
+                    ),
+                    text = "### Executive Summary\n\n- **Argyrodite (Li6PS5Cl):** Achieves **3.2 to 10.4 mS/cm** at 25 C after halide disorder tuning, with low grain-boundary resistance under 50 MPa stack pressure.\n- **Garnet (Ta-doped LLZO):** Reaches **0.8 to 1.3 mS/cm** at 25 C with superior electrochemical stability against lithium metal, but requires interfacial lithiophilic interlayers (Au, Al2O3, or Sn) to prevent void formation.",
+                ),
+            ),
+        ),
+        ConversationThread(
+            id = "conv-work-q4",
+            title = "Q4 Product Roadmap & OKR Alignment",
+            category = "Yesterday",
+            updatedRelative = "Yesterday",
+            modelSlug = "gpt-5.4",
+            isWorkMode = true,
+            spaceId = "space-product",
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-301",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "Yesterday",
+                    text = "Draft the Q4 engineering milestones from our connected Google Drive spec and Slack thread.",
+                ),
+                ChatMessage(
+                    id = "msg-302",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "Yesterday",
+                    text = "I reviewed the **Q4 Architecture Spec** in Google Drive and the **#eng-roadmap** Slack channel. Key milestones: F1 Design System by Week 2, F2 Core Chat & Voice by Week 4, and F4 Codex Remote Next by Week 6.",
+                ),
+            ),
+        ),
+        ConversationThread(
+            id = "conv-locked-medical",
+            title = "Annual Blood Panel & Lipid Lab Notes",
+            category = "Locked",
+            updatedRelative = "3d ago",
+            modelSlug = "gpt-5.4",
+            isLocked = true,
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-401",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "3d ago",
+                    text = "Summarize my ApoB (74 mg/dL) and HbA1c (5.1%) results before my physician visit.",
+                ),
+                ChatMessage(
+                    id = "msg-402",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "3d ago",
+                    text = "Both markers are within optimal reference ranges: ApoB at 74 mg/dL is below the <80 mg/dL preventative threshold, and HbA1c at 5.1% indicates normal glycemic control. Note: this chat is protected by your Account PIN and excluded from general memory.",
+                ),
+            ),
+        ),
+        ConversationThread(
+            id = "conv-archived-travel",
+            title = "Kyoto & Kanazawa 10-Day Rail Itinerary",
+            category = "Archived",
+            updatedRelative = "2w ago",
+            modelSlug = "gpt-4o",
+            isArchived = true,
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-501",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "2w ago",
+                    text = "Plan a quiet morning route in Arashiyama before 8 AM.",
+                ),
+                ChatMessage(
+                    id = "msg-502",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "2w ago",
+                    text = "Start at JR Saga-Arashiyama Station at 6:45 AM, walk through the Bamboo Grove toward Okochi Sanso Garden, and continue north along the Sagano scenic path to Adashino Nenbutsu-ji.",
+                ),
+            ),
+        ),
+    )
+
+    val artifacts: List<ArtifactItem> = listOf(
+        ArtifactItem(
+            id = "art-site-1",
+            title = "Interactive Solar Telemetry Dashboard",
+            subtitle = "Published Site | Version 4",
+            category = ArtifactCategory.SITES,
+            updatedRelative = "Updated 18m ago",
+            sizeLabel = "142 KB",
+            isFavorite = true,
+            isShared = true,
+            sharedBy = "You",
+            previewContent = "Live photovoltaic array telemetry with MPPT curve visualization, battery SoC gauges, and 30-day inverter yield analytics.",
+            siteTrafficViews = 4820,
+            siteUniqueVisitors = 1290,
+            envVars = mapOf(
+                "PUBLIC_TELEMETRY_ENDPOINT" to "https://telemetry.openchat.local/v2",
+                "INVERTER_API_KEY" to "************9f2a",
+            ),
+        ),
+        ArtifactItem(
+            id = "art-page-1",
+            title = "Clean-Room Android Design Token Specification",
+            subtitle = "Page | Collaborative Document",
+            category = ArtifactCategory.PAGES,
+            updatedRelative = "Updated 2h ago",
+            sizeLabel = "38 KB",
+            isFavorite = true,
+            isShared = true,
+            sharedBy = "Maya Lin",
+            previewContent = "# Design Token Specification\n\nAll color, typography, corner radius (4dp-48dp), and spatial spring (0.9 / 700.0) values are verified directly against decompiled resources.",
+        ),
+        ArtifactItem(
+            id = "art-img-1",
+            title = "Isometric Cybernetic Terrarium Render",
+            subtitle = "Image | Square 1:1 | Created with Images Thinking",
+            category = ArtifactCategory.IMAGES,
+            updatedRelative = "Created yesterday",
+            sizeLabel = "2.4 MB",
+            isFavorite = true,
+            previewContent = "High-detail isometric glass terrarium housing bioluminescent moss, miniature brass sensors, and soft volumetric morning light.",
+        ),
+        ArtifactItem(
+            id = "art-file-1",
+            title = "q4_latency_benchmark_results.csv",
+            subtitle = "CSV Spreadsheet | Uploaded to Kotlin Architecture",
+            category = ArtifactCategory.FILES,
+            updatedRelative = "Uploaded 3d ago",
+            sizeLabel = "840 KB",
+            isShared = false,
+            previewContent = "endpoint,p50_ms,p95_ms,p99_ms\n/v1/conversation/stream,42,118,204\n/v1/codex/remote/sync,19,54,91",
+        ),
+        ArtifactItem(
+            id = "art-folder-1",
+            title = "Architecture Decision Records (ADRs)",
+            subtitle = "Folder | 6 items | Shared with Workspace",
+            category = ArtifactCategory.FOLDERS,
+            updatedRelative = "Updated 4d ago",
+            sizeLabel = "6 items",
+            isShared = true,
+            sharedBy = "You",
+            previewContent = "Contains ADR-0001 (CI-Only Build & Decompilation), ADR-0002 (Clean-Room Mock Architecture), and security review notes.",
+        ),
+        ArtifactItem(
+            id = "art-deleted-1",
+            title = "draft_onboarding_copy_v1.md",
+            subtitle = "Deleted 5 days ago | 25 days until permanent deletion",
+            category = ArtifactCategory.RECENTLY_DELETED,
+            updatedRelative = "Deleted 5d ago",
+            sizeLabel = "12 KB",
+            previewContent = "Archived onboarding copy draft prior to final English string alignment.",
+        ),
+    )
+
+    val gizmos: List<GizmoItem> = listOf(
+        GizmoItem(
+            id = "gizmo-kotlin-architect",
+            name = "Kotlin & Compose Architect",
+            author = "OpenChat Engineering",
+            category = "Developer Tools",
+            rating = "4.9 out of 5 stars",
+            conversationsCount = "120K+ chats",
+            description = "Reviews Jetpack Compose layouts, StateFlow architecture, baseline profiles, and Gradle version catalogs.",
+            capabilities = listOf("Code Interpreter & Data Analysis", "Web Search", "Memory"),
+            starterPrompts = listOf(
+                "Audit my Compose screen for unnecessary recompositions",
+                "Migrate this ViewModel to unidirectional StateFlow",
+            ),
+            isPinnedInDrawer = true,
+        ),
+        GizmoItem(
+            id = "gizmo-deep-researcher",
+            name = "ArXiv & Patent Synthesizer",
+            author = "Academic Labs",
+            category = "Research and Knowledge",
+            rating = "4.8 out of 5 stars",
+            conversationsCount = "85K+ chats",
+            description = "Synthesizes peer-reviewed literature into structured tables with methodology critiques and citation verification.",
+            capabilities = listOf("Web Search", "Browsing", "Code Interpreter & Data Analysis"),
+            starterPrompts = listOf(
+                "Compare transformer linear attention variants from 2025-2026",
+                "Summarize solid-state electrolyte interface papers",
+            ),
+            isPinnedInDrawer = true,
+        ),
+        GizmoItem(
+            id = "gizmo-canvas-designer",
+            name = "UI Systems & Vector Crafter",
+            author = "Design Studio",
+            category = "Creativity and Design",
+            rating = "4.9 out of 5 stars",
+            conversationsCount = "64K+ chats",
+            description = "Generates clean Android vector drawables, Material 3 color schemes, and accessible contrast pairings.",
+            capabilities = listOf("Image Generation", "Actions", "Memory"),
+            starterPrompts = listOf(
+                "Generate a 24dp vector icon for a remote terminal",
+                "Build a dark/light token palette with WCAG AAA contrast",
+            ),
+            isPinnedInDrawer = false,
+        ),
+        GizmoItem(
+            id = "gizmo-sql-analyst",
+            name = "Telemetry & SQL Optimizer",
+            author = "Data Platform Team",
+            category = "Business and Analytics",
+            rating = "4.7 out of 5 stars",
+            conversationsCount = "41K+ chats",
+            description = "Analyzes query execution plans, DuckDB/PostgreSQL schemas, and cohort retention charts.",
+            capabilities = listOf("Code Interpreter & Data Analysis", "Actions"),
+            starterPrompts = listOf(
+                "Optimize this windowed retention query",
+                "Plot p95 latency anomalies from my CSV upload",
+            ),
+            isPinnedInDrawer = false,
+        ),
+    )
+
+    val connectors: List<PluginConnectorItem> = listOf(
+        PluginConnectorItem(
+            id = "conn-gmail",
+            name = "Gmail",
+            developer = "Google",
+            category = "Productivity",
+            isConnected = true,
+            accountEmail = "alex.rivera@openchat.io",
+            permissionMode = "Allow read actions",
+            proactiveEnabled = true,
+            skills = listOf("Read email threads", "Search emails", "Draft replies"),
+            description = "Allow Open Chat to securely access your inbox to read, draft, send, and proactively assist when needed.",
+        ),
+        PluginConnectorItem(
+            id = "conn-gcal",
+            name = "Google Calendar",
+            developer = "Google",
+            category = "Productivity",
+            isConnected = true,
+            accountEmail = "alex.rivera@openchat.io",
+            permissionMode = "Allow low-risk actions",
+            proactiveEnabled = true,
+            skills = listOf("Find free time", "Read schedule", "Create calendar events"),
+            description = "Allow Open Chat to securely access your calendar to find events, create plans, and proactively assist.",
+        ),
+        PluginConnectorItem(
+            id = "conn-gdrive",
+            name = "Google Drive",
+            developer = "Google",
+            category = "Research and Knowledge",
+            isConnected = true,
+            accountEmail = "alex.rivera@openchat.io",
+            permissionMode = "Allow read actions",
+            proactiveEnabled = false,
+            skills = listOf("Search Drive documents", "Read Google Docs & Sheets", "Sync project sources"),
+            description = "Reference Google Docs, Sheets, and Slides automatically when responding in chat.",
+        ),
+        PluginConnectorItem(
+            id = "conn-github",
+            name = "GitHub",
+            developer = "GitHub",
+            category = "Developer Tools",
+            isConnected = true,
+            accountEmail = "Ren42377",
+            permissionMode = "Always ask",
+            proactiveEnabled = false,
+            skills = listOf("Search repositories", "Inspect pull requests", "Review workflow runs"),
+            description = "Inspect commits, pull requests, and Actions logs across connected repositories.",
+        ),
+        PluginConnectorItem(
+            id = "conn-slack",
+            name = "Slack",
+            developer = "Salesforce",
+            category = "Messaging and Social",
+            isConnected = false,
+            accountEmail = null,
+            permissionMode = "Always ask",
+            proactiveEnabled = false,
+            skills = listOf("Search channels", "Summarize threads"),
+            description = "Search workspace channels and summarize team threads.",
+        ),
+        PluginConnectorItem(
+            id = "conn-1password",
+            name = "1Password",
+            developer = "AgileBits",
+            category = "Productivity",
+            isConnected = true,
+            accountEmail = "alex.rivera@openchat.io",
+            permissionMode = "Always ask",
+            proactiveEnabled = false,
+            skills = listOf("Fill with 1Password", "Verify saved logins"),
+            description = "Securely fill website credentials during Cloud Browser handoff sessions.",
+        ),
+    )
+
+    val projectSpaces: List<ProjectSpaceItem> = listOf(
+        ProjectSpaceItem(
+            id = "space-android",
+            name = "Open Chat Android Clean-Room",
+            description = "Zero-local-footprint Android UI reconstruction in Kotlin and Jetpack Compose.",
+            updatedRelative = "Updated 10m ago",
+            customInstructions = "Follow GEMINI.md rules strictly: zero emojis, zero em dashes, 100% English UI and docs, and verify all builds on GitHub Actions.",
+            collaborators = listOf("Alex Rivera (Owner)", "Maya Lin (Can edit)", "Samir Patel (Can view)"),
+            sourceFiles = listOf("PRD.md", "libs.versions.toml", "colors.xml", "dimens.xml"),
+            conversationCount = 8,
+        ),
+        ProjectSpaceItem(
+            id = "space-product",
+            name = "Q4 Platform Architecture & OKRs",
+            description = "Cross-team planning space for Codex Remote, Orbit Dots, and Artifact Sites.",
+            updatedRelative = "Updated yesterday",
+            customInstructions = "Summarize technical trade-offs as concise ADR tables with explicit latency budgets.",
+            collaborators = listOf("Alex Rivera (Owner)", "Elena Rostova (Can edit)"),
+            sourceFiles = listOf("q4_latency_benchmark_results.csv", "roadmap_2026.pdf"),
+            conversationCount = 5,
+        ),
+    )
+
+    val scheduledTasks: List<ScheduledTaskItem> = listOf(
+        ScheduledTaskItem(
+            id = "task-1",
+            title = "Morning GitHub Actions & PR Digest",
+            cadenceBadge = "DAILY",
+            scheduleSummary = "Daily at 8:00 AM",
+            promptInstruction = "Check open pull requests, summarize failing CI workflows, and highlight dependency updates.",
+            lastRunSummary = "Ran Today at 8:00 AM | Completed",
+            status = "SCHEDULED",
+            notifyWhenComplete = true,
+        ),
+        ScheduledTaskItem(
+            id = "task-2",
+            title = "Weekly Solid-State Battery ArXiv Digest",
+            cadenceBadge = "WEEKLY",
+            scheduleSummary = "Fridays at 5:00 PM",
+            promptInstruction = "Search new ArXiv preprints on sulfide and halide solid electrolytes and rank by ionic conductivity.",
+            lastRunSummary = "Ran Friday at 5:00 PM | Completed",
+            status = "SCHEDULED",
+            notifyWhenComplete = true,
+        ),
+        ScheduledTaskItem(
+            id = "task-3",
+            title = "Production p99 Latency Anomaly Monitor",
+            cadenceBadge = "MONITORING",
+            scheduleSummary = "Every hour",
+            promptInstruction = "Monitor telemetry endpoints and alert if p99 exceeds 250 ms for two consecutive windows.",
+            lastRunSummary = "Running now | 0 anomalies detected",
+            status = "MONITORING",
+            notifyWhenComplete = true,
+        ),
+    )
+
+    val memories: List<MemoryEntry> = listOf(
+        MemoryEntry(
+            id = "mem-1",
+            content = "Prefers Kotlin 2.4+ with Jetpack Compose Material 3 and strict unidirectional StateFlow holders.",
+            sourceChatTitle = "Kotlin Multiplatform Compose Architecture",
+            createdRelative = "Saved 2d ago",
+        ),
+        MemoryEntry(
+            id = "mem-2",
+            content = "Enforces zero local build footprint; all Gradle builds, unit tests, and APK decompilation run on GitHub Actions.",
+            sourceChatTitle = "CI Pipeline Setup",
+            createdRelative = "Saved 4d ago",
+        ),
+        MemoryEntry(
+            id = "mem-3",
+            content = "Never uses emojis or em dashes in code, commit messages, UI strings, or technical documentation.",
+            sourceChatTitle = "Repository Standards",
+            createdRelative = "Saved 5d ago",
+        ),
+        MemoryEntry(
+            id = "mem-fin-1",
+            content = "Targets a 75% equity index / 25% short-duration Treasury allocation with monthly automated rebalancing.",
+            sourceChatTitle = "Portfolio Allocation Review",
+            createdRelative = "Saved 1w ago",
+            isFinancial = true,
+        ),
+    )
+
+    val customDictionaryWords: List<String> = listOf(
+        "Apktool",
+        "JADX",
+        "StateFlow",
+        "Calpico",
+        "Tibro",
+        "Snorlax",
+        "Argyrodite",
+    )
+
+    val voicePresets: List<VoicePreset> = listOf(
+        VoicePreset("sol", "Sol", "Warm, grounded, and articulate", "Great for brainstorming and everyday conversations"),
+        VoicePreset("cove", "Cove", "Calm, measured, and clear", "Ideal for technical explanations and code walkthroughs"),
+        VoicePreset("juniper", "Juniper", "Bright, upbeat, and expressive", "Great for language practice and rapid ideation"),
+        VoicePreset("ember", "Ember", "Confident, direct, and resonant", "Ideal for executive summaries and coaching"),
+        VoicePreset("breeze", "Breeze", "Light, conversational, and relaxed", "Great for casual check-ins and storytelling"),
+        VoicePreset("maple", "Maple", "Thoughtful, steady, and encouraging", "Ideal for study sessions and step-by-step tutoring"),
+        VoicePreset("vale", "Vale", "Crisp, analytical, and precise", "Great for deep research and financial briefings"),
+    )
+
+    val codexSessions: List<CodexRemoteSession> = listOf(
+        CodexRemoteSession(
+            id = "codex-1",
+            title = "Implement F4 Codex Remote Next & Slingshot UI",
+            hostName = "Alex-Workstation-Pro",
+            hostType = "VS Code | Desktop",
+            directory = "/workspace/open-chat",
+            branchWorktree = "main (clean worktree)",
+            status = "Needs approval",
+            modelSlug = "gpt-5.4",
+            effort = ReasoningEffort.HIGH,
+            contextPercentLeft = 78,
+            contextUsedSummary = "78% left (44K used / 200K)",
+            rateLimitReset = "resets in 3h 40m",
+            permissionMode = "Default permissions (Runs commands in a sandbox)",
+            pendingCommandApproval = "./gradlew lintDebug testDebugUnitTest assembleDebug",
+            fileChanges = listOf(
+                "M app/src/main/java/io/openchat/ui/screens/CodexRemoteScreen.kt (+184 -12)",
+                "M app/src/test/java/io/openchat/ApplicationConfigTest.kt (+42 -0)",
+            ),
+            terminalOutput = listOf(
+                "$ git status -s",
+                "M app/src/main/java/io/openchat/ui/screens/CodexRemoteScreen.kt",
+                "$ ./gradlew testDebugUnitTest --dry-run",
+                "Waiting for approval to execute command in sandbox...",
+            ),
+        ),
+        CodexRemoteSession(
+            id = "codex-2",
+            title = "Optimize Vector Drawable Path Precision",
+            hostName = "Codex Cloud Environment",
+            hostType = "Cloud | Ubuntu 24.04",
+            directory = "/cloud/repos/open-chat",
+            branchWorktree = "feat/vector-icons",
+            status = "Ready to review",
+            modelSlug = "gpt-5.5-pro",
+            effort = ReasoningEffort.EXTRA_HIGH,
+            contextPercentLeft = 91,
+            contextUsedSummary = "91% left (18K used / 200K)",
+            rateLimitReset = "resets in 4h 12m",
+            permissionMode = "Auto-review (Reviews elevated requests automatically)",
+            pendingCommandApproval = null,
+            fileChanges = listOf(
+                "A app/src/main/res/drawable/ds_openchat_emblem_24.xml (+22 -0)",
+                "M app/src/main/java/io/openchat/ui/theme/OpenChatIcons.kt (+68 -0)",
+            ),
+            terminalOutput = listOf(
+                "$ ./gradlew lintDebug",
+                "BUILD SUCCESSFUL in 14s",
+                "0 errors, 0 warnings",
+            ),
+        ),
+    )
+
+    val codexPets: List<CodexCompanionPet> = listOf(
+        CodexCompanionPet("codex", "Codex", "The original Codex companion.", "[ >_ ]", isSelected = true),
+        CodexCompanionPet("dewey", "Dewey", "A calm companion for focused workspace days", "( o_o )"),
+        CodexCompanionPet("fireball", "Fireball", "Hot path energy for fast iteration.", "/\\*^*/\\"),
+        CodexCompanionPet("hoots", "Hoots", "A sharp-eyed owl for polished work in a blink.", "{ O,O }"),
+        CodexCompanionPet("null_signal", "Null Signal", "Quiet signal from the void.", "[ :: ]"),
+        CodexCompanionPet("rocky", "Rocky", "A steady rock for when the inbox gets out of control", "< ___ >"),
+        CodexCompanionPet("seedy", "Seedy", "Small green shoots for new ideas.", "(y)->[v]"),
+        CodexCompanionPet("stacky", "Stacky", "A balanced stack for deep work.", "[===]"),
+        CodexCompanionPet("bsod", "BSOD", "A tiny blue-screen companion.", "[ :( ]"),
+    )
+
+    val orbitDots: List<OrbitDotAgent> = listOf(
+        OrbitDotAgent(
+            id = "dot-primary",
+            name = "Nova Dot",
+            status = "Working for 2h 14m",
+            workingDuration = "2h 14m",
+            avatarColor = "Purple",
+            avatarShape = "Orbital",
+            avatarEyes = "Focused",
+            avatarGlasses = "Round Wire",
+            emailAddress = "nova.dot@openchat.agent",
+            phoneNumber = "+1 (415) 890-4210",
+            connectedApps = listOf("Gmail", "Google Calendar", "Google Drive", "GitHub"),
+            customRules = listOf(
+                "When Nova Dot wants to send an external email, always ask for approval first.",
+                "When a GitHub Actions workflow fails on main, summarize the log and draft a fix plan.",
+                "Never schedule meetings during Quiet Hours (9:00 PM - 7:30 AM).",
+            ),
+            ideasFeed = listOf(
+                "Prepare a 1-page briefing for tomorrow's 10:00 AM Architecture Sync with Maya Lin.",
+                "Consolidate 3 duplicate dependency update PRs in Ren42377/open-chat.",
+                "Archive 4 expired promotional threads from your inbox.",
+            ),
+        ),
+    )
+
+    val calpicoThreads: List<CalpicoThread> = listOf(
+        CalpicoThread(
+            id = "calpico-1",
+            title = "Android Clean-Room Design Crew",
+            participants = listOf("You", "Maya Lin", "Samir Patel", "Open Chat"),
+            lastMessage = "Maya Lin: Check out the spring stiffness values we extracted from dimens.xml!",
+            updatedRelative = "5m ago",
+            unreadCount = 2,
+            assistantRespondMode = "When mentioned",
+        ),
+        CalpicoThread(
+            id = "calpico-2",
+            title = "Weekend Kyoto Trip Planning",
+            participants = listOf("You", "Elena Rostova", "Open Chat"),
+            lastMessage = "Open Chat: I mapped out the early morning Arashiyama walking route for Saturday.",
+            updatedRelative = "3h ago",
+            unreadCount = 0,
+            assistantRespondMode = "Automatically",
+        ),
+        CalpicoThread(
+            id = "calpico-req-1",
+            title = "Devon Brooks",
+            participants = listOf("Devon Brooks"),
+            lastMessage = "Sent an Open Chat conversation: \"Rust WebAssembly SIMD Benchmarks\"",
+            updatedRelative = "1d ago",
+            unreadCount = 1,
+            isRequest = true,
+        ),
+    )
+
+    val financeAccounts: List<FinanceAccount> = listOf(
+        FinanceAccount("fin-1", "Fidelity", "Core Brokerage & Index ETFs", "Investments", "$148,400", 62, "Updated recently"),
+        FinanceAccount("fin-2", "Mercury", "Operating Checking", "Cash", "$42,150", 18, "Just now"),
+        FinanceAccount("fin-3", "TreasuryDirect", "4-Week T-Bill Ladder", "Other assets", "$48,000", 20, "Updated recently"),
+        FinanceAccount("fin-4", "Chase Sapphire", "Visa Infinite **** 4821", "Credit cards", "-$1,840", 100, "Just now"),
+    )
+
+    val walletCards: List<WalletCard> = listOf(
+        WalletCard("card-1", "Visa", "4821", "09/29", "Alex Rivera", isDefault = true),
+        WalletCard("card-2", "Mastercard", "8304", "11/28", "Alex Rivera", isDefault = false),
+    )
+
+    val shoppingProducts: List<ShoppingProduct> = listOf(
+        ShoppingProduct(
+            id = "prod-1",
+            title = "Keychron Q1 Max QMK/VIA Wireless Custom Mechanical Keyboard",
+            merchant = "Keychron Direct",
+            price = "$209.00",
+            taxAndShipping = "Base price: $194.00 | Shipping: Free | Estimated tax: $15.00",
+            rating = "4.9 out of 5 stars (1,420 reviews)",
+            whyYouMightLike = "Full CNC aluminum body, double-gasket mount, 2.4 GHz 1000 Hz polling rate, and hot-swappable Gateron Jupiter Banana tactile switches.",
+            reviewHighlights = "Reviewers praise the acoustic foam tuning out of the box and native Linux/Android/macOS VIA keymap support.",
+        ),
+        ShoppingProduct(
+            id = "prod-2",
+            title = "Sony WH-1000XM5 Wireless Noise Canceling Headphones",
+            merchant = "AudioLab Official",
+            price = "$328.00",
+            taxAndShipping = "Base price: $299.00 | Shipping: Free | Estimated tax: $29.00",
+            rating = "4.8 out of 5 stars (3,890 reviews)",
+            whyYouMightLike = "Eight-microphone Auto NC Optimizer, multipoint Bluetooth connection, and 30-hour battery life with 3-minute USB-PD quick charge.",
+            reviewHighlights = "Highlighted for crystal-clear voice call pickup during realtime Voice sessions in noisy environments.",
+        ),
+    )
+
+    val sportsMatches: List<SportsMatch> = listOf(
+        SportsMatch(
+            id = "match-1",
+            competition = "UEFA Champions League | Quarter-Final",
+            homeTeam = "Arsenal",
+            awayTeam = "Bayern Munich",
+            homeScore = 2,
+            awayScore = 1,
+            status = "LIVE | 78'",
+            summary = "Saka opened at 14', Musiala equalized at 51', and Rice scored from the edge of the box at 72'.",
+        ),
+        SportsMatch(
+            id = "match-2",
+            competition = "Premier League | Matchweek 32",
+            homeTeam = "Liverpool",
+            awayTeam = "Manchester City",
+            homeScore = 1,
+            awayScore = 1,
+            status = "Final",
+            summary = "High-tempo tactical draw at Anfield with 64% second-half pressing intensity.",
+        ),
+    )
+
+    val familyMembers: List<FamilyMemberRule> = listOf(
+        FamilyMemberRule(
+            id = "fam-1",
+            name = "Leo Rivera (Teen Account)",
+            role = "My child",
+            status = "Active | Safeguards enabled",
+            quietHours = "Every day | 10:00 PM - 7:00 AM",
+            studyHours = "Weekdays | 3:30 PM - 6:00 PM (Hints & guided questions first)",
+            reduceSensitiveContent = true,
+        ),
+    )
+
+    val trustedContacts: List<TrustedContactItem> = listOf(
+        TrustedContactItem(
+            id = "tc-1",
+            name = "Maya Lin",
+            email = "maya.lin@openchat.io",
+            phone = "+1 (415) 555-0194",
+            status = "Active | Confirmed",
+        ),
+    )
+
+    val securitySessions: List<SecuritySession> = listOf(
+        SecuritySession(
+            id = "sess-1",
+            deviceName = "Pixel 9 Pro (Android 16)",
+            locationAndTime = "San Francisco, CA * Active now",
+            isCurrentSession = true,
+            isTrustedDevice = true,
+        ),
+        SecuritySession(
+            id = "sess-2",
+            deviceName = "Alex-Workstation-Pro (Linux x86_64)",
+            locationAndTime = "San Francisco, CA * Today at 9:42 AM",
+            isCurrentSession = false,
+            isTrustedDevice = true,
+        ),
+    )
+}
