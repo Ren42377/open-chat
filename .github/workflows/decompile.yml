@@ -1,0 +1,81 @@
+name: Decompile Reference APK
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: decompile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  decompile:
+    name: Extract manifest, resources, and sources
+    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'apk-src'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      APKTOOL_VERSION: "3.0.3"
+      JADX_VERSION: "1.5.6"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download reference APK from release apk-src
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download apk-src --pattern "*.apk" --output target.apk --clobber
+          ls -lh target.apk
+
+      - name: Download pinned Apktool and decode manifest and resources
+        run: |
+          curl -sSLo apktool.jar "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar"
+          java -Xmx6g -jar apktool.jar d -s -f target.apk -o out_apktool
+          mkdir -p artifact_manifest_res
+          cp out_apktool/AndroidManifest.xml artifact_manifest_res/AndroidManifest.xml
+          cp -r out_apktool/res artifact_manifest_res/res
+          if [ -f out_apktool/apktool.yml ]; then
+            cp out_apktool/apktool.yml artifact_manifest_res/apktool.yml
+          fi
+
+      - name: Download pinned JADX and decompile sources
+        run: |
+          curl -sSLo jadx.zip "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
+          unzip -q jadx.zip -d jadx_bin
+          chmod +x jadx_bin/bin/jadx
+          export JAVA_OPTS="-Xmx10g"
+          ./jadx_bin/bin/jadx --show-bad-code -j 4 -d out_jadx target.apk || true
+          test -d out_jadx/sources
+          if [ -d out_jadx/resources/res ]; then
+            cp -rn out_jadx/resources/res/* artifact_manifest_res/res/ || true
+          fi
+          mkdir -p artifact_sources
+          mv out_jadx/sources artifact_sources/sources
+          echo "jadx=${JADX_VERSION}" > artifact_sources/jadx-version.txt
+
+      - name: Upload manifest and resources artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: decompiled_ref-manifest-res
+          path: artifact_manifest_res/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload decompiled sources artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: decompiled_ref-sources
+          path: artifact_sources/
+          if-no-files-found: error
+          retention-days: 30

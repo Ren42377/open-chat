@@ -1,0 +1,29 @@
+# Decompiled reference artifacts downloaded from CI (never committed)
+_decompiled_ref/
+
+# Gradle build outputs
+.gradle/
+build/
+
+# Local IDE state
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local Android SDK paths resolved per machine
+local.properties
+
+# Signing material
+*.jks
+*.p12
+keystore.properties
+
+# Tooling state
+.kotlin/
+*.log
+.DS_Store
+
+# Local lint tool binary
+ktlint
