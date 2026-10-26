@@ -75,6 +75,17 @@ jobs:
             cp -r out_apktool/unknown artifact_assets/unknown
           fi
 
+      - name: Decompress Valdi UI modules
+        run: |
+          sudo apt-get install -y --no-install-recommends zstd binutils
+          mkdir -p artifact_assets/valdi_decompressed artifact_assets/valdi_strings
+          for module in out_apktool/assets/*.valdimodule; do
+            name=$(basename "$module" .valdimodule)
+            zstd -dc "$module" > "artifact_assets/valdi_decompressed/${name}.bin" || echo "zstd failed for $name"
+            strings -n 4 "artifact_assets/valdi_decompressed/${name}.bin" > "artifact_assets/valdi_strings/${name}.txt" || true
+          done
+          ls artifact_assets/valdi_decompressed | head -5
+
       - name: Download pinned JADX and decompile sources
         run: |
           curl -sSLo jadx.zip "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
