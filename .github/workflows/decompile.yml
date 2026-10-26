@@ -64,6 +64,17 @@ jobs:
             cp out_apktool/apktool.yml artifact_manifest_res/apktool.yml
           fi
 
+      - name: Collect APK assets and entry listing
+        run: |
+          mkdir -p artifact_assets
+          unzip -l target.apk > artifact_assets/apk-entries.txt
+          if [ -d out_apktool/assets ]; then
+            cp -r out_apktool/assets artifact_assets/assets
+          fi
+          if [ -d out_apktool/unknown ]; then
+            cp -r out_apktool/unknown artifact_assets/unknown
+          fi
+
       - name: Download pinned JADX and decompile sources
         run: |
           curl -sSLo jadx.zip "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
@@ -84,6 +95,14 @@ jobs:
         with:
           name: decompiled_ref-manifest-res
           path: artifact_manifest_res/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload assets artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: decompiled_ref-assets
+          path: artifact_assets/
           if-no-files-found: error
           retention-days: 30
 
