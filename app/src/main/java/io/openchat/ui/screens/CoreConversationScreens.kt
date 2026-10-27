@@ -1,8 +1,10 @@
 package io.openchat.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -25,10 +27,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -52,14 +56,18 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -89,7 +97,10 @@ import io.openchat.ui.components.StateSimulationHost
 import io.openchat.ui.components.StatusBadge
 import io.openchat.ui.theme.OpenChatDimens
 import io.openchat.ui.theme.OpenChatIcons
+import io.openchat.ui.theme.OpenChatMotion
 import io.openchat.ui.theme.OpenChatPalette
+import io.openchat.ui.theme.pressScaleClickable
+import kotlinx.coroutines.delay
 
 @Composable
 fun NavigationDrawerContent(
@@ -834,213 +845,277 @@ fun ConversationScreen(
         else -> "Canary"
     }
 
+    val hasMessages = activeThread != null && activeThread.messages.isNotEmpty()
+    val pillBg = if (isDark) OpenChatPalette.DarkBgTertiary else OpenChatPalette.LightBgTertiary
+    val pillBorder = if (isDark) OpenChatPalette.DarkPillBorder else OpenChatPalette.LightPillBorder
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        // Authentic ChatGPT Android Top App Bar
+        // Authentic ChatGPT Android Floating Top App Bar (matches ConversationTopBar in a49.java / o481.java)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 6.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Left: Sidebar Menu button (2 asymmetric horizontal lines)
-            IconButton(onClick = onOpenDrawer) {
-                DsIcon(
-                    drawableRes = OpenChatIcons.SidebarMenu,
-                    contentDescription = "Open navigation drawer",
-                    size = 24.dp,
-                    tint = MaterialTheme.colorScheme.onBackground,
+            // Left: Floating 44.dp Circular Sidebar Menu Button (ds_sidebar_menu_regular_24)
+            Surface(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .border(width = 1.dp, color = pillBorder, shape = CircleShape)
+                    .pressScaleClickable(onClick = onOpenDrawer),
+                shape = CircleShape,
+                color = pillBg,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    DsIcon(
+                        drawableRes = OpenChatIcons.SidebarMenu,
+                        contentDescription = "Open navigation drawer",
+                        size = 22.dp,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+
+            // Center: Clean in active conversation (tap to switch model, long-press for debug);
+            // shows "ChatGPT 5.4 v" / "Get Plus" pill when in an empty New Chat
+            if (!hasMessages) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(22.dp),
+                        color = pillBg,
+                        modifier = Modifier
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .border(width = 1.dp, color = pillBorder, shape = RoundedCornerShape(22.dp))
+                            .combinedClickable(
+                                onClick = { showModelSheet = true },
+                                onLongClick = onOpenDebugSheet,
+                            ),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        ) {
+                            Text(
+                                text = "ChatGPT",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                text = modelShortLabel,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            DsIcon(
+                                drawableRes = OpenChatIcons.ChevronDown,
+                                contentDescription = "Select model",
+                                size = 15.dp,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    if (snapshot.subscriptionTier == SubscriptionTier.FREE) {
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = if (isDark) OpenChatPalette.PlusPillBgDark else OpenChatPalette.PlusPillBgLight,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .pressScaleClickable { onNavigate(OpenChatDestination.AUTH_AND_SUBSCRIPTION) },
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                DsIcon(
+                                    drawableRes = OpenChatIcons.Sparkles,
+                                    contentDescription = null,
+                                    size = 14.dp,
+                                    tint = if (isDark) OpenChatPalette.PlusPillTextDark else OpenChatPalette.PlusPillTextLight,
+                                )
+                                Text(
+                                    text = "Get Plus",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isDark) OpenChatPalette.PlusPillTextDark else OpenChatPalette.PlusPillTextLight,
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                        .combinedClickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null,
+                            onClick = { showModelSheet = true },
+                            onLongClick = onOpenDebugSheet,
+                        ),
                 )
             }
 
-            // Center: "ChatGPT 5.4 v" Model Picker or "Get Plus" Pill
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // Right: Unified Stadium Action Pill ([ComposeNewChat | EllipsisVertical])
+            Surface(
+                modifier = Modifier
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .border(width = 1.dp, color = pillBorder, shape = RoundedCornerShape(22.dp)),
+                shape = RoundedCornerShape(22.dp),
+                color = pillBg,
             ) {
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .combinedClickable(
-                            onClick = { showModelSheet = true },
-                            onLongClick = onOpenDebugSheet,
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
-                        text = "ChatGPT",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Text(
-                        text = modelShortLabel,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    DsIcon(
-                        drawableRes = OpenChatIcons.ChevronDown,
-                        contentDescription = "Select model",
-                        size = 16.dp,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                if (snapshot.subscriptionTier == SubscriptionTier.FREE) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isDark) OpenChatPalette.PlusPillBgDark else OpenChatPalette.PlusPillBgLight,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .clickable { onNavigate(OpenChatDestination.AUTH_AND_SUBSCRIPTION) },
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    if (!hasMessages) {
+                        IconButton(
+                            onClick = { controller.toggleTemporaryChat() },
+                            modifier = Modifier.size(38.dp),
                         ) {
                             DsIcon(
-                                drawableRes = OpenChatIcons.Sparkles,
-                                contentDescription = null,
-                                size = 14.dp,
-                                tint = if (isDark) OpenChatPalette.PlusPillTextDark else OpenChatPalette.PlusPillTextLight,
-                            )
-                            Text(
-                                text = "Get Plus",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (isDark) OpenChatPalette.PlusPillTextDark else OpenChatPalette.PlusPillTextLight,
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Right: Temporary Chat / New Chat + Overflow Menu
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (activeThread == null || activeThread.messages.isEmpty()) {
-                    IconButton(onClick = { controller.toggleTemporaryChat() }) {
-                        DsIcon(
-                            drawableRes = OpenChatIcons.ChatBubbleDashed,
-                            contentDescription = "Temporary chat",
-                            size = 22.dp,
-                            tint = if (snapshot.isTemporaryChat) {
-                                OpenChatPalette.AccentBlue
-                            } else {
-                                MaterialTheme.colorScheme.onBackground
-                            },
-                        )
-                    }
-                } else {
-                    IconButton(
-                        onClick = {
-                            controller.startNewChat(mode = ConversationMode.DEFAULT, isTemporary = false)
-                        },
-                    ) {
-                        DsIcon(
-                            drawableRes = OpenChatIcons.ComposeNewChat,
-                            contentDescription = "New chat",
-                            size = 22.dp,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        )
-                    }
-                }
-
-                Box {
-                    IconButton(onClick = { showOverflowMenu = true }) {
-                        DsIcon(
-                            drawableRes = OpenChatIcons.EllipsisVertical,
-                            contentDescription = "More options",
-                            size = 22.dp,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showOverflowMenu,
-                        onDismissRequest = { showOverflowMenu = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Share") },
-                            leadingIcon = {
-                                DsIcon(drawableRes = OpenChatIcons.ShareAndroid, contentDescription = null, size = 18.dp)
-                            },
-                            onClick = {
-                                showOverflowMenu = false
-                                controller.showToastBanner("Share link copied to clipboard")
-                            },
-                        )
-                        if (activeThread != null) {
-                            DropdownMenuItem(
-                                text = { Text(if (activeThread.isPinned) "Unpin chat" else "Pin chat") },
-                                leadingIcon = {
-                                    DsIcon(drawableRes = OpenChatIcons.Pin, contentDescription = null, size = 18.dp)
-                                },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    controller.togglePinConversation(activeThread.id)
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Archive") },
-                                leadingIcon = {
-                                    DsIcon(drawableRes = OpenChatIcons.Archive, contentDescription = null, size = 18.dp)
-                                },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    controller.toggleArchiveConversation(activeThread.id)
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(if (activeThread.isLocked) "Unlock chat" else "Move to Locked chats") },
-                                leadingIcon = {
-                                    DsIcon(drawableRes = OpenChatIcons.Lock, contentDescription = null, size = 18.dp)
-                                },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    controller.toggleLockConversation(activeThread.id)
+                                drawableRes = OpenChatIcons.ChatBubbleDashed,
+                                contentDescription = "Temporary chat",
+                                size = 20.dp,
+                                tint = if (snapshot.isTemporaryChat) {
+                                    OpenChatPalette.AccentBlue
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
                                 },
                             )
                         }
-                        DropdownMenuItem(
-                            text = { Text(if (snapshot.isTemporaryChat) "Turn off Temporary chat" else "Temporary chat") },
-                            leadingIcon = {
-                                DsIcon(drawableRes = OpenChatIcons.ChatBubbleDashed, contentDescription = null, size = 18.dp)
-                            },
+                    } else {
+                        IconButton(
                             onClick = {
-                                showOverflowMenu = false
-                                controller.toggleTemporaryChat()
+                                controller.startNewChat(mode = ConversationMode.DEFAULT, isTemporary = false)
                             },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Switch model (${currentModel?.name ?: snapshot.selectedModelSlug})") },
-                            leadingIcon = {
-                                DsIcon(drawableRes = OpenChatIcons.Sparkles, contentDescription = null, size = 18.dp)
-                            },
-                            onClick = {
-                                showOverflowMenu = false
-                                showModelSheet = true
-                            },
-                        )
-                        HorizontalDivider()
-                        DropdownMenuItem(
-                            text = { Text("Developer State & Flags") },
-                            leadingIcon = {
-                                DsIcon(drawableRes = OpenChatIcons.Flask, contentDescription = null, size = 18.dp)
-                            },
-                            onClick = {
-                                showOverflowMenu = false
-                                onOpenDebugSheet()
-                            },
-                        )
+                            modifier = Modifier.size(38.dp),
+                        ) {
+                            DsIcon(
+                                drawableRes = OpenChatIcons.ComposeNewChat,
+                                contentDescription = "New chat",
+                                size = 20.dp,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+                    }
+
+                    Box {
+                        IconButton(
+                            onClick = { showOverflowMenu = true },
+                            modifier = Modifier.size(38.dp),
+                        ) {
+                            DsIcon(
+                                drawableRes = OpenChatIcons.EllipsisVertical,
+                                contentDescription = "More options",
+                                size = 20.dp,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Share") },
+                                leadingIcon = {
+                                    DsIcon(drawableRes = OpenChatIcons.ShareAndroid, contentDescription = null, size = 18.dp)
+                                },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    controller.showToastBanner("Share link copied to clipboard")
+                                },
+                            )
+                            if (activeThread != null) {
+                                DropdownMenuItem(
+                                    text = { Text(if (activeThread.isPinned) "Unpin chat" else "Pin chat") },
+                                    leadingIcon = {
+                                        DsIcon(drawableRes = OpenChatIcons.Pin, contentDescription = null, size = 18.dp)
+                                    },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        controller.togglePinConversation(activeThread.id)
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Archive") },
+                                    leadingIcon = {
+                                        DsIcon(drawableRes = OpenChatIcons.Archive, contentDescription = null, size = 18.dp)
+                                    },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        controller.toggleArchiveConversation(activeThread.id)
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(if (activeThread.isLocked) "Unlock chat" else "Move to Locked chats") },
+                                    leadingIcon = {
+                                        DsIcon(drawableRes = OpenChatIcons.Lock, contentDescription = null, size = 18.dp)
+                                    },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        controller.toggleLockConversation(activeThread.id)
+                                    },
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text(if (snapshot.isTemporaryChat) "Turn off Temporary chat" else "Temporary chat") },
+                                leadingIcon = {
+                                    DsIcon(drawableRes = OpenChatIcons.ChatBubbleDashed, contentDescription = null, size = 18.dp)
+                                },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    controller.toggleTemporaryChat()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Switch model (${currentModel?.name ?: snapshot.selectedModelSlug})") },
+                                leadingIcon = {
+                                    DsIcon(drawableRes = OpenChatIcons.Sparkles, contentDescription = null, size = 18.dp)
+                                },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showModelSheet = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Tools & web search") },
+                                leadingIcon = {
+                                    DsIcon(drawableRes = OpenChatIcons.Sliders, contentDescription = null, size = 18.dp)
+                                },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showToolsSheet = true
+                                },
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = { Text("Developer State & Flags") },
+                                leadingIcon = {
+                                    DsIcon(drawableRes = OpenChatIcons.Flask, contentDescription = null, size = 18.dp)
+                                },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onOpenDebugSheet()
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -1062,7 +1137,7 @@ fun ConversationScreen(
             onRetry = { controller.setUiSimState(UiSimState.SUCCESS) },
             modifier = Modifier.weight(1f),
         ) {
-            if (activeThread == null || activeThread.messages.isEmpty()) {
+            if (!hasMessages) {
                 EmptyConversationCenter(
                     isTemporaryChat = snapshot.isTemporaryChat,
                     onSelectPrompt = { prompt -> controller.sendUserMessage(prompt) },
@@ -1075,7 +1150,7 @@ fun ConversationScreen(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    item { Spacer(modifier = Modifier.height(4.dp)) }
+                    item { Spacer(modifier = Modifier.height(6.dp)) }
 
                     if (snapshot.isTemporaryChat) {
                         item {
@@ -1105,7 +1180,7 @@ fun ConversationScreen(
                         }
                     }
 
-                    if (activeThread.branchedFromTitle != null) {
+                    if (activeThread?.branchedFromTitle != null) {
                         item {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1126,11 +1201,19 @@ fun ConversationScreen(
                         }
                     }
 
-                    items(activeThread.messages, key = { it.id }) { message ->
+                    val threadMessages = activeThread?.messages.orEmpty()
+                    items(threadMessages, key = { it.id }) { message ->
+                        val isLatestAssistantMessage = !message.isUser &&
+                            threadMessages.lastOrNull { !it.isUser }?.id == message.id
                         AuthenticMessageItem(
                             message = message,
+                            isLatestAssistant = isLatestAssistantMessage,
                             variantsFlagEnabled = snapshot.isFlagEnabled("feature_variants_in_stream"),
                             onSelectVariant = { idx -> controller.selectMessageVariant(message.id, idx) },
+                            onOpenModelPicker = { showModelSheet = true },
+                            onBranchChat = {
+                                controller.showToastBanner("Branched conversation in new chat")
+                            },
                             onActionFeedback = { msg -> controller.showToastBanner(msg) },
                         )
                     }
@@ -1151,13 +1234,16 @@ fun ConversationScreen(
             }
         }
 
-        // Authentic 2-Tier Pill Composer Input Bar
+        // Authentic Stadium Pill Composer Input Bar (matches MultilineComposerLayoutContent in v21.java & eho.java)
         ComposerInputBar(
             promptInput = promptInput,
             onPromptChange = { promptInput = it },
+            hasMessages = hasMessages,
+            isTemporaryChat = snapshot.isTemporaryChat,
             isWebSearchEnabled = snapshot.isWebSearchEnabled,
             isDeepResearchEnabled = snapshot.isDeepResearchEnabled,
             isWorkMode = snapshot.isWorkMode,
+            isAttachmentSheetOpen = showAttachmentSheet,
             onToggleWebSearch = { controller.toggleWebSearch() },
             onToggleDeepResearch = { controller.toggleDeepResearch() },
             onOpenAttachmentSheet = { showAttachmentSheet = true },
@@ -1264,7 +1350,7 @@ fun ConversationScreen(
         }
     }
 
-    // "+" Attachment Bottom Sheet (Camera, Photos, Files, Sketch)
+    // "+" Attachment & Tools Bottom Sheet (Camera, Photos, Files, Create image, Web search, Deep research)
     if (showAttachmentSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAttachmentSheet = false },
@@ -1274,7 +1360,7 @@ fun ConversationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1314,6 +1400,58 @@ fun ConversationScreen(
 
                 HorizontalDivider()
 
+                ToolSheetRow(
+                    iconRes = OpenChatIcons.PhotoSparkle,
+                    title = "Create an image",
+                    subtitle = "Visualize ideas and edit images",
+                    active = false,
+                    onClick = {
+                        showAttachmentSheet = false
+                        onNavigate(OpenChatDestination.CAMERA_SKETCH)
+                    },
+                )
+                ToolSheetRow(
+                    iconRes = OpenChatIcons.Globe,
+                    title = "Search the web",
+                    subtitle = "Find real-time news and verified citations",
+                    active = snapshot.isWebSearchEnabled,
+                    onClick = {
+                        controller.toggleWebSearch()
+                        showAttachmentSheet = false
+                    },
+                )
+                ToolSheetRow(
+                    iconRes = OpenChatIcons.Telescope,
+                    title = "Deep research",
+                    subtitle = "In-depth multi-step synthesis with sources",
+                    active = snapshot.isDeepResearchEnabled,
+                    onClick = {
+                        controller.toggleDeepResearch()
+                        showAttachmentSheet = false
+                    },
+                )
+                ToolSheetRow(
+                    iconRes = OpenChatIcons.Lightbulb,
+                    title = "Think longer",
+                    subtitle = "Current effort: ${snapshot.selectedEffort.label}",
+                    active = snapshot.selectedEffort != ReasoningEffort.LOW,
+                    onClick = {
+                        val nextIndex = (ReasoningEffort.entries.indexOf(snapshot.selectedEffort) + 1) %
+                            ReasoningEffort.entries.size
+                        controller.selectEffort(ReasoningEffort.entries[nextIndex])
+                        showAttachmentSheet = false
+                    },
+                )
+                ToolSheetRow(
+                    iconRes = OpenChatIcons.Suitcase,
+                    title = "Work mode",
+                    subtitle = "Reference connected workspace docs and apps",
+                    active = snapshot.isWorkMode,
+                    onClick = {
+                        controller.toggleWorkMode()
+                        showAttachmentSheet = false
+                    },
+                )
                 DrawerMenuRow(
                     iconRes = OpenChatIcons.PaintbrushOnPencil,
                     label = "Sketch & annotate image",
@@ -1652,16 +1790,50 @@ private fun SuggestionPillChip(
 @Composable
 private fun AuthenticMessageItem(
     message: ChatMessage,
+    isLatestAssistant: Boolean,
     variantsFlagEnabled: Boolean,
     onSelectVariant: (Int) -> Unit,
+    onOpenModelPicker: () -> Unit,
+    onBranchChat: () -> Unit,
     onActionFeedback: (String) -> Unit,
 ) {
     var showReasoning by remember { mutableStateOf(false) }
     var showSources by remember { mutableStateOf(false) }
+    var showMoreActionsMenu by remember { mutableStateOf(false) }
+    var selectedReaction by remember(message.id) { mutableStateOf(message.reaction) }
+    var copiedRecently by remember(message.id) { mutableStateOf(false) }
+    var isReadingAloud by remember(message.id) { mutableStateOf(false) }
+    var personalityDismissed by remember(message.id) { mutableStateOf(false) }
+
     val isDark = MaterialTheme.colorScheme.background == OpenChatPalette.DarkBgPrimary
+    val pillBorder = if (isDark) OpenChatPalette.DarkPillBorder else OpenChatPalette.LightPillBorder
+
+    // Progressive streaming text reveal for newly sent messages ("Just now")
+    val shouldAnimateStream = !message.isUser && message.timestamp == "Just now"
+    var revealedChars by remember(message.id, message.text) {
+        mutableIntStateOf(if (shouldAnimateStream) 0 else message.text.length)
+    }
+    LaunchedEffect(message.id, message.text, shouldAnimateStream) {
+        if (shouldAnimateStream && revealedChars < message.text.length) {
+            val step = (message.text.length / 28).coerceAtLeast(3)
+            while (revealedChars < message.text.length) {
+                delay(18L)
+                revealedChars = (revealedChars + step).coerceAtMost(message.text.length)
+            }
+        } else {
+            revealedChars = message.text.length
+        }
+    }
+
+    LaunchedEffect(copiedRecently) {
+        if (copiedRecently) {
+            delay(1400L)
+            copiedRecently = false
+        }
+    }
 
     if (message.isUser) {
-        // Authentic Right-Aligned User Pill Bubble (No "You" label, no box border)
+        // Authentic Right-Aligned Compact User Pill Bubble (widthIn(max = 280.dp) so short text like "Hi" or "hai" hugs tightly)
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End,
@@ -1691,9 +1863,11 @@ private fun AuthenticMessageItem(
             }
 
             Surface(
-                shape = RoundedCornerShape(22.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = if (isDark) OpenChatPalette.DarkBgUserMessage else OpenChatPalette.LightBgUserMessage,
-                modifier = Modifier.fillMaxWidth(0.82f),
+                modifier = Modifier
+                    .widthIn(max = 280.dp)
+                    .border(width = 1.dp, color = pillBorder, shape = RoundedCornerShape(24.dp)),
             ) {
                 Text(
                     text = message.text,
@@ -1702,29 +1876,45 @@ private fun AuthenticMessageItem(
                         lineHeight = 23.sp,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
                 )
             }
         }
     } else {
-        // Authentic Unboxed Full-Width Assistant Message directly on Background Canvas
+        // Authentic Unboxed Full-Width Assistant Message directly on Pitch-Black / White Canvas
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // Inline "Thought for Xs >" Toggle
+            // Inline "Thought for Xs >" Toggle with Shimmer Animation (n981.java "ShimmerText")
             if (message.thinkingSeconds > 0 && message.reasoningSteps.isNotEmpty()) {
+                val infiniteShimmer = rememberInfiniteTransition(label = "ThinkingShimmer")
+                val shimmerAlpha by infiniteShimmer.animateFloat(
+                    initialValue = 0.62f,
+                    targetValue = 1.0f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 900),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
+                    label = "ShimmerAlpha",
+                )
+
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .clickable { showReasoning = !showReasoning }
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 4.dp)
+                            .alpha(if (revealedChars < message.text.length) shimmerAlpha else 1f),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
-                            text = "Thought for ${message.thinkingSeconds}s",
+                            text = if (revealedChars < message.text.length) {
+                                "Thinking..."
+                            } else {
+                                "Thought for ${message.thinkingSeconds}s"
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1741,7 +1931,11 @@ private fun AuthenticMessageItem(
                         )
                     }
 
-                    AnimatedVisibility(visible = showReasoning) {
+                    AnimatedVisibility(
+                        visible = showReasoning,
+                        enter = OpenChatMotion.expandVerticalSpring(),
+                        exit = OpenChatMotion.collapseVerticalSpring(),
+                    ) {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Box(
                                 modifier = Modifier
@@ -1798,8 +1992,12 @@ private fun AuthenticMessageItem(
                 }
             }
 
-            // Formatted Assistant Text
-            AssistantFormattedText(text = message.text)
+            // Formatted Assistant Text with Streaming Reveal & Pulsing Cursor
+            val displayedText = message.text.take(revealedChars)
+            AssistantFormattedText(
+                text = displayedText,
+                isStreaming = revealedChars < message.text.length,
+            )
 
             // Authentic Code Block Card
             message.codeSnippets.forEach { snippet ->
@@ -1883,7 +2081,7 @@ private fun AuthenticMessageItem(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .clickable { showSources = !showSources },
+                            .pressScaleClickable { showSources = !showSources },
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -1905,7 +2103,11 @@ private fun AuthenticMessageItem(
                         }
                     }
 
-                    AnimatedVisibility(visible = showSources) {
+                    AnimatedVisibility(
+                        visible = showSources,
+                        enter = OpenChatMotion.expandVerticalSpring(),
+                        exit = OpenChatMotion.collapseVerticalSpring(),
+                    ) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             message.citations.forEach { citation ->
                                 Surface(
@@ -1937,8 +2139,10 @@ private fun AuthenticMessageItem(
                 }
             }
 
-            // Variants In Stream Switcher
-            if (variantsFlagEnabled && message.variants.size > 1) {
+            // Variants In Stream Switcher (shown when reasoning/variants are active)
+            if (variantsFlagEnabled && message.variants.size > 1 &&
+                (message.thinkingSeconds > 0 || message.selectedVariantIndex > 0)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1960,76 +2164,238 @@ private fun AuthenticMessageItem(
                 }
             }
 
-            // Authentic ChatGPT Action Row (Copy, Read Aloud, Thumbs Up, Thumbs Down, Regenerate, Share)
+            // Authentic ChatGPT 6-Icon Action Row (matches screenshot & kj81.java / hp71.java):
+            // 1. Copy | 2. Thumbs Up | 3. Thumbs Down | 4. Read Aloud | 5. Share | 6. More (EllipsisVertical)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                // 1. Copy (swaps to Checkmark with spring animation on click)
                 MessageActionIconButton(
-                    iconRes = OpenChatIcons.Copy,
+                    iconRes = if (copiedRecently) OpenChatIcons.Checkmark else OpenChatIcons.Copy,
                     contentDescription = "Copy response",
-                    onClick = { onActionFeedback("Copied to clipboard") },
+                    isActive = copiedRecently,
+                    onClick = {
+                        copiedRecently = true
+                        onActionFeedback("Copied to clipboard")
+                    },
                 )
+
+                // 2. Good response (Thumbs Up -> ThumbUpFilled with spring pop)
+                val isLiked = selectedReaction == "Thumbs Up"
+                MessageActionIconButton(
+                    iconRes = if (isLiked) OpenChatIcons.ThumbUpFilled else OpenChatIcons.ThumbUp,
+                    contentDescription = "Good response",
+                    isActive = isLiked,
+                    onClick = {
+                        selectedReaction = if (isLiked) null else "Thumbs Up"
+                        onActionFeedback("Thank you for your feedback!")
+                    },
+                )
+
+                // 3. Bad response (Thumbs Down -> ThumbDownFilled with spring pop)
+                val isDisliked = selectedReaction == "Thumbs Down"
+                MessageActionIconButton(
+                    iconRes = if (isDisliked) OpenChatIcons.ThumbDownFilled else OpenChatIcons.ThumbDown,
+                    contentDescription = "Bad response",
+                    isActive = isDisliked,
+                    onClick = {
+                        selectedReaction = if (isDisliked) null else "Thumbs Down"
+                        onActionFeedback("Thank you for your feedback!")
+                    },
+                )
+
+                // 4. Read Aloud (SpeakerWave)
                 MessageActionIconButton(
                     iconRes = OpenChatIcons.SpeakerWave,
                     contentDescription = "Read aloud",
-                    onClick = { onActionFeedback("Reading response aloud") },
-                )
-                MessageActionIconButton(
-                    iconRes = OpenChatIcons.ThumbUp,
-                    contentDescription = "Good response",
-                    onClick = { onActionFeedback("Thanks for your feedback") },
-                )
-                MessageActionIconButton(
-                    iconRes = OpenChatIcons.ThumbDown,
-                    contentDescription = "Bad response",
-                    onClick = { onActionFeedback("Feedback recorded") },
-                )
-                MessageActionIconButton(
-                    iconRes = OpenChatIcons.ArrowRotateClockwise,
-                    contentDescription = "Regenerate response",
+                    isActive = isReadingAloud,
                     onClick = {
-                        if (message.variants.size > 1) {
-                            val nextIdx = (message.selectedVariantIndex + 1) % message.variants.size
-                            onSelectVariant(nextIdx)
-                        } else {
-                            onActionFeedback("Regenerated response")
-                        }
+                        isReadingAloud = !isReadingAloud
+                        onActionFeedback(if (isReadingAloud) "Reading response aloud" else "Stopped reading aloud")
                     },
                 )
+
+                // 5. Share (ShareAndroid)
                 MessageActionIconButton(
                     iconRes = OpenChatIcons.ShareAndroid,
                     contentDescription = "Share response",
-                    onClick = { onActionFeedback("Share sheet opened") },
+                    onClick = { onActionFeedback("Share link copied to clipboard") },
                 )
+
+                // 6. More actions (EllipsisVertical -> Try again, Branch in new chat, Switch model)
+                Box {
+                    MessageActionIconButton(
+                        iconRes = OpenChatIcons.EllipsisVertical,
+                        contentDescription = "More actions",
+                        onClick = { showMoreActionsMenu = true },
+                    )
+
+                    DropdownMenu(
+                        expanded = showMoreActionsMenu,
+                        onDismissRequest = { showMoreActionsMenu = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Try again") },
+                            leadingIcon = {
+                                DsIcon(
+                                    drawableRes = OpenChatIcons.ArrowRotateClockwise,
+                                    contentDescription = null,
+                                    size = 18.dp,
+                                )
+                            },
+                            onClick = {
+                                showMoreActionsMenu = false
+                                if (message.variants.size > 1) {
+                                    val nextIdx = (message.selectedVariantIndex + 1) % message.variants.size
+                                    onSelectVariant(nextIdx)
+                                } else {
+                                    onActionFeedback("Regenerated response")
+                                }
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Branch in new chat") },
+                            leadingIcon = {
+                                DsIcon(
+                                    drawableRes = OpenChatIcons.ArrowCurvedRight,
+                                    contentDescription = null,
+                                    size = 18.dp,
+                                )
+                            },
+                            onClick = {
+                                showMoreActionsMenu = false
+                                onBranchChat()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Switch model") },
+                            leadingIcon = {
+                                DsIcon(
+                                    drawableRes = OpenChatIcons.Sparkles,
+                                    contentDescription = null,
+                                    size = 18.dp,
+                                )
+                            },
+                            onClick = {
+                                showMoreActionsMenu = false
+                                onOpenModelPicker()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Read aloud") },
+                            leadingIcon = {
+                                DsIcon(
+                                    drawableRes = OpenChatIcons.SpeakerWave,
+                                    contentDescription = null,
+                                    size = 18.dp,
+                                )
+                            },
+                            onClick = {
+                                showMoreActionsMenu = false
+                                isReadingAloud = !isReadingAloud
+                                onActionFeedback("Reading response aloud")
+                            },
+                        )
+                    }
+                }
+            }
+
+            // Inline Personality Feedback Prompt ("Do you like this personality?" from screenshot)
+            AnimatedVisibility(
+                visible = isLatestAssistant && !personalityDismissed,
+                enter = OpenChatMotion.expandVerticalSpring(),
+                exit = OpenChatMotion.collapseVerticalSpring(),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f),
+                        modifier = Modifier.padding(top = 6.dp, bottom = 10.dp),
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "Do you like this personality?",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            MessageActionIconButton(
+                                iconRes = OpenChatIcons.ThumbUp,
+                                contentDescription = "Like personality",
+                                onClick = {
+                                    personalityDismissed = true
+                                    onActionFeedback("Thank you for your feedback!")
+                                },
+                            )
+                            MessageActionIconButton(
+                                iconRes = OpenChatIcons.ThumbDown,
+                                contentDescription = "Dislike personality",
+                                onClick = {
+                                    personalityDismissed = true
+                                    onActionFeedback("Thank you for your feedback!")
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AssistantFormattedText(text: String) {
+private fun AssistantFormattedText(
+    text: String,
+    isStreaming: Boolean = false,
+) {
     val cleanText = text.replace("**", "")
     val paragraphs = cleanText.split("\n\n")
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        paragraphs.forEach { block ->
+        paragraphs.forEachIndexed { index, block ->
             val trimmed = block.trim()
-            if (trimmed.startsWith("### ")) {
-                Text(
-                    text = trimmed.removePrefix("### "),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            } else {
-                Text(
-                    text = trimmed,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 24.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+            val isLastParagraph = index == paragraphs.lastIndex
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (trimmed.startsWith("### ")) {
+                    Text(
+                        text = trimmed.removePrefix("### "),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                } else {
+                    Text(
+                        text = trimmed,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                }
+                if (isStreaming && isLastParagraph) {
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onBackground),
+                    )
+                }
             }
         }
     }
@@ -2039,17 +2405,29 @@ private fun AssistantFormattedText(text: String) {
 private fun MessageActionIconButton(
     iconRes: Int,
     contentDescription: String,
+    isActive: Boolean = false,
     onClick: () -> Unit,
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isActive) 1.14f else 1.0f,
+        animationSpec = OpenChatMotion.defaultSpatialSpring(),
+        label = "ReactionScale",
+    )
     IconButton(
         onClick = onClick,
-        modifier = Modifier.size(34.dp),
+        modifier = Modifier
+            .size(36.dp)
+            .scale(scale),
     ) {
         DsIcon(
             drawableRes = iconRes,
             contentDescription = contentDescription,
-            size = 18.dp,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 19.dp,
+            tint = if (isActive) {
+                MaterialTheme.colorScheme.onBackground
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
     }
 }
@@ -2100,9 +2478,12 @@ private fun SponsoredAdCard(
 private fun ComposerInputBar(
     promptInput: String,
     onPromptChange: (String) -> Unit,
+    hasMessages: Boolean,
+    isTemporaryChat: Boolean,
     isWebSearchEnabled: Boolean,
     isDeepResearchEnabled: Boolean,
     isWorkMode: Boolean,
+    isAttachmentSheetOpen: Boolean,
     onToggleWebSearch: () -> Unit,
     onToggleDeepResearch: () -> Unit,
     onOpenAttachmentSheet: () -> Unit,
@@ -2112,6 +2493,25 @@ private fun ComposerInputBar(
 ) {
     val isDark = MaterialTheme.colorScheme.background == OpenChatPalette.DarkBgPrimary
     val composerBg = if (isDark) OpenChatPalette.DarkBgTertiary else OpenChatPalette.LightBgTertiary
+    val pillBorder = if (isDark) OpenChatPalette.DarkPillBorder else OpenChatPalette.LightPillBorder
+
+    // Exact dynamic placeholder selection from `_decompiled_ref/sources/defpackage/eho.java` lines 298-315:
+    // R.string.a2a ("Temporary chat"), R.string.a2d ("Work with ChatGPT"),
+    // R.string.a29 ("Reply to ChatGPT"), R.string.a24 ("Ask ChatGPT")
+    val placeholderText = when {
+        isTemporaryChat -> "Temporary chat"
+        isWorkMode -> "Work with ChatGPT"
+        hasMessages -> "Reply to ChatGPT"
+        else -> "Ask ChatGPT"
+    }
+
+    val plusRotation by animateFloatAsState(
+        targetValue = if (isAttachmentSheetOpen) 45f else 0f,
+        animationSpec = OpenChatMotion.defaultSpatialSpring(),
+        label = "PlusButtonRotation",
+    )
+
+    val hasActiveTools = isWebSearchEnabled || isDeepResearchEnabled || isWorkMode
 
     Column(
         modifier = Modifier
@@ -2120,106 +2520,33 @@ private fun ComposerInputBar(
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 52.dp)
+                .border(width = 1.dp, color = pillBorder, shape = RoundedCornerShape(26.dp)),
             shape = RoundedCornerShape(26.dp),
             color = composerBg,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(horizontal = 8.dp, vertical = 7.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                // Top Tier: Borderless Text Field ("Ask anything")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 2.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.CenterStart,
+                // Expandable Active Tool Chips inside the Stadium Pill (only visible when a tool is active)
+                AnimatedVisibility(
+                    visible = hasActiveTools,
+                    enter = OpenChatMotion.expandVerticalSpring(),
+                    exit = OpenChatMotion.collapseVerticalSpring(),
                 ) {
-                    if (promptInput.isEmpty()) {
-                        Text(
-                            text = "Ask anything",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    BasicTextField(
-                        value = promptInput,
-                        onValueChange = onPromptChange,
-                        textStyle = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 16.sp,
-                            lineHeight = 22.sp,
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
-                        maxLines = 6,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-
-                // Bottom Tier inside Pill: [+] [Sliders / Active Tool Pills] ... [Mic] [Voice / Send Circle]
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    // Left controls: "+" Attachment & Sliders Tools + Active Tool Chips
                     Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .horizontalScroll(rememberScrollState()),
                     ) {
-                        Surface(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .clickable(onClick = onOpenAttachmentSheet),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.65f),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                DsIcon(
-                                    drawableRes = OpenChatIcons.Plus,
-                                    contentDescription = "Add photos or files",
-                                    size = 20.dp,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-                        }
-
-                        Surface(
-                            modifier = Modifier
-                                .height(34.dp)
-                                .clip(RoundedCornerShape(17.dp))
-                                .clickable(onClick = onOpenToolsSheet),
-                            shape = RoundedCornerShape(17.dp),
-                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.65f),
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                DsIcon(
-                                    drawableRes = OpenChatIcons.Sliders,
-                                    contentDescription = "Tools",
-                                    size = 17.dp,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                                if (!isWebSearchEnabled && !isDeepResearchEnabled) {
-                                    Text(
-                                        text = "Tools",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                }
-                            }
-                        }
-
                         if (isWebSearchEnabled) {
                             ActiveComposerToolPill(
                                 iconRes = OpenChatIcons.Globe,
@@ -2227,7 +2554,6 @@ private fun ComposerInputBar(
                                 onDismiss = onToggleWebSearch,
                             )
                         }
-
                         if (isDeepResearchEnabled) {
                             ActiveComposerToolPill(
                                 iconRes = OpenChatIcons.Telescope,
@@ -2235,68 +2561,114 @@ private fun ComposerInputBar(
                                 onDismiss = onToggleDeepResearch,
                             )
                         }
-
                         if (isWorkMode) {
-                            Surface(
-                                shape = RoundedCornerShape(17.dp),
-                                color = OpenChatPalette.AccentBlue.copy(alpha = 0.14f),
-                            ) {
-                                Text(
-                                    text = "Work",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = OpenChatPalette.AccentBlue,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                                )
-                            }
+                            ActiveComposerToolPill(
+                                iconRes = OpenChatIcons.Suitcase,
+                                label = "Work",
+                                onDismiss = onOpenToolsSheet,
+                            )
                         }
                     }
+                }
 
-                    // Right controls: Mic Dictation + Filled Black/White Voice/Send Button
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                // Single-Row Stadium Composer Layout: [+] [Reply to ChatGPT / Ask ChatGPT] [Mic] [Voice/Send Circle]
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    // Left: "+" Button (ds_plus_lg_regular_24)
+                    IconButton(
+                        onClick = onOpenAttachmentSheet,
+                        modifier = Modifier
+                            .size(38.dp)
+                            .rotate(plusRotation),
                     ) {
-                        IconButton(
-                            onClick = {
+                        DsIcon(
+                            drawableRes = OpenChatIcons.Plus,
+                            contentDescription = "Add attachments and tools",
+                            size = 24.dp,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+
+                    // Center: Borderless Multiline TextField (v21.java / pup.java)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        if (promptInput.isEmpty()) {
+                            Text(
+                                text = placeholderText,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        BasicTextField(
+                            value = promptInput,
+                            onValueChange = onPromptChange,
+                            textStyle = TextStyle(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                lineHeight = 22.sp,
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+                            maxLines = 6,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    // Right: Microphone Dictation Button (ds_microphone_regular_24)
+                    IconButton(
+                        onClick = {
+                            if (promptInput.isBlank()) {
+                                onPromptChange("Summarize the key points from today's architecture review")
+                            } else {
+                                onSend()
+                            }
+                        },
+                        modifier = Modifier.size(38.dp),
+                    ) {
+                        DsIcon(
+                            drawableRes = OpenChatIcons.Microphone,
+                            contentDescription = "Voice input",
+                            size = 22.dp,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    // Rightmost: 38.dp Filled Circle with AnimatedContent Spring Morph (VoiceButton <-> ArrowUpButton)
+                    Surface(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .pressScaleClickable {
                                 if (promptInput.isBlank()) {
-                                    onPromptChange("Summarize the key points from today's architecture review")
+                                    onOpenVoiceCall()
                                 } else {
                                     onSend()
                                 }
                             },
-                            modifier = Modifier.size(36.dp),
-                        ) {
-                            DsIcon(
-                                drawableRes = OpenChatIcons.Microphone,
-                                contentDescription = "Dictate",
-                                size = 21.dp,
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-
-                        Surface(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    if (promptInput.isBlank()) {
-                                        onOpenVoiceCall()
-                                    } else {
-                                        onSend()
-                                    }
-                                },
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            AnimatedContent(
+                                targetState = promptInput.isBlank(),
+                                transitionSpec = { OpenChatMotion.composerActionMorph() },
+                                label = "ComposerVoiceSendMorph",
+                            ) { isBlank ->
                                 DsIcon(
-                                    drawableRes = if (promptInput.isBlank()) {
+                                    drawableRes = if (isBlank) {
                                         OpenChatIcons.VoiceButton
                                     } else {
                                         OpenChatIcons.ArrowUpButton
                                     },
-                                    contentDescription = if (promptInput.isBlank()) {
+                                    contentDescription = if (isBlank) {
                                         "Start voice mode"
                                     } else {
                                         "Send message"

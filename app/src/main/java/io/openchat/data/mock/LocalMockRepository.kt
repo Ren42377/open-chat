@@ -255,6 +255,45 @@ object LocalMockRepository {
 
     val initialConversations: List<ConversationThread> = listOf(
         ConversationThread(
+            id = "conv-greeting",
+            title = "Casual Check-In",
+            category = "Today",
+            updatedRelative = "Just now",
+            modelSlug = "gpt-5.4",
+            isPinned = false,
+            messages = listOf(
+                ChatMessage(
+                    id = "msg-1",
+                    isUser = true,
+                    senderName = "You",
+                    timestamp = "09:36",
+                    text = "Hi",
+                ),
+                ChatMessage(
+                    id = "msg-2",
+                    isUser = false,
+                    senderName = "Open Chat",
+                    timestamp = "09:36",
+                    modelSlug = "gpt-5.4",
+                    text = "Hi. Is there anything you would like to talk about?",
+                    variants = listOf(
+                        MessageVariant(
+                            optionNumber = 1,
+                            label = "Option 1: Warm & Direct",
+                            content = "Hi. Is there anything you would like to talk about?",
+                            thinkingDurationSeconds = 0,
+                        ),
+                        MessageVariant(
+                            optionNumber = 2,
+                            label = "Option 2: Friendly Check-In",
+                            content = "Hello! What is on your mind today?",
+                            thinkingDurationSeconds = 0,
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        ConversationThread(
             id = "conv-architecture",
             title = "Kotlin Multiplatform Compose Architecture",
             category = "Today",
@@ -265,14 +304,14 @@ object LocalMockRepository {
             branchedFromTitle = "Jetpack Navigation 3 Migration",
             messages = listOf(
                 ChatMessage(
-                    id = "msg-1",
+                    id = "msg-101",
                     isUser = true,
                     senderName = "You",
                     timestamp = "10:14 AM",
                     text = "Can you design a clean-room state holder pattern for a multi-surface Android app with offline mock simulation and spring transitions?",
                 ),
                 ChatMessage(
-                    id = "msg-2",
+                    id = "msg-102",
                     isUser = false,
                     senderName = "Open Chat",
                     timestamp = "10:14 AM",

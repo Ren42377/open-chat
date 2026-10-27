@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,7 @@ import io.openchat.ui.screens.SettingsAndProfileScreen
 import io.openchat.ui.screens.SpacesAndTasksScreen
 import io.openchat.ui.screens.VoiceCallScreen
 import io.openchat.ui.theme.OpenChatIcons
+import io.openchat.ui.theme.OpenChatMotion
 import io.openchat.ui.theme.OpenChatTheme
 import kotlinx.coroutines.launch
 
@@ -222,107 +224,113 @@ fun OpenChatApp(
                         .fillMaxSize()
                         .padding(innerPadding),
                 ) {
-                    when (currentDestination) {
-                        OpenChatDestination.CONVERSATION -> ConversationScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigate = { currentDestination = it },
-                            onOpenDrawer = {
-                                coroutineScope.launch { drawerState.open() }
-                            },
-                            onOpenDebugSheet = {
-                                showDebugSheet = true
-                            },
-                        )
+                    AnimatedContent(
+                        targetState = currentDestination,
+                        transitionSpec = { OpenChatMotion.destinationMorph() },
+                        label = "DestinationSpatialTransition",
+                    ) { destination ->
+                        when (destination) {
+                            OpenChatDestination.CONVERSATION -> ConversationScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigate = { currentDestination = it },
+                                onOpenDrawer = {
+                                    coroutineScope.launch { drawerState.open() }
+                                },
+                                onOpenDebugSheet = {
+                                    showDebugSheet = true
+                                },
+                            )
 
-                        OpenChatDestination.VOICE_CALL -> VoiceCallScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onEndCall = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.VOICE_CALL -> VoiceCallScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onEndCall = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.CAMERA_SKETCH -> CameraSketchScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateBackToChat = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.CAMERA_SKETCH -> CameraSketchScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateBackToChat = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.ARTIFACT_LIBRARY -> ArtifactLibraryScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateToChat = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.ARTIFACT_LIBRARY -> ArtifactLibraryScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateToChat = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.DISCOVERY_HUB -> DiscoveryHubScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateToChat = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.DISCOVERY_HUB -> DiscoveryHubScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateToChat = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.SPACES_AND_TASKS -> SpacesAndTasksScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateToChat = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.SPACES_AND_TASKS -> SpacesAndTasksScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateToChat = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.SETTINGS_AND_PROFILE -> SettingsAndProfileScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                        )
+                            OpenChatDestination.SETTINGS_AND_PROFILE -> SettingsAndProfileScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                            )
 
-                        OpenChatDestination.AUTH_AND_SUBSCRIPTION -> AuthAndSubscriptionScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                        )
+                            OpenChatDestination.AUTH_AND_SUBSCRIPTION -> AuthAndSubscriptionScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                            )
 
-                        OpenChatDestination.CODEX_REMOTE -> CodexRemoteScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                        )
+                            OpenChatDestination.CODEX_REMOTE -> CodexRemoteScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                            )
 
-                        OpenChatDestination.ORBIT_TIBRO -> OrbitTibroScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateToVoice = {
-                                currentDestination = OpenChatDestination.VOICE_CALL
-                            },
-                        )
+                            OpenChatDestination.ORBIT_TIBRO -> OrbitTibroScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateToVoice = {
+                                    currentDestination = OpenChatDestination.VOICE_CALL
+                                },
+                            )
 
-                        OpenChatDestination.CALPICO_SOCIAL -> CalpicoSocialScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                        )
+                            OpenChatDestination.CALPICO_SOCIAL -> CalpicoSocialScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                            )
 
-                        OpenChatDestination.FINANCE_AND_VERTICALS -> FinanceAndVerticalsScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                        )
+                            OpenChatDestination.FINANCE_AND_VERTICALS -> FinanceAndVerticalsScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                            )
 
-                        OpenChatDestination.LOCKED_CHATS_AND_SAFETY -> LockedChatsAndSafetyScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onNavigateToChat = {
-                                currentDestination = OpenChatDestination.CONVERSATION
-                            },
-                        )
+                            OpenChatDestination.LOCKED_CHATS_AND_SAFETY -> LockedChatsAndSafetyScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onNavigateToChat = {
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
 
-                        OpenChatDestination.EXPERIMENT_INSPECTOR -> ExperimentInspectorScreen(
-                            snapshot = snapshot,
-                            controller = controller,
-                            onJumpToDestination = { destination ->
-                                currentDestination = destination
-                            },
-                        )
+                            OpenChatDestination.EXPERIMENT_INSPECTOR -> ExperimentInspectorScreen(
+                                snapshot = snapshot,
+                                controller = controller,
+                                onJumpToDestination = { nextDest ->
+                                    currentDestination = nextDest
+                                },
+                            )
+                        }
                     }
                 }
             }

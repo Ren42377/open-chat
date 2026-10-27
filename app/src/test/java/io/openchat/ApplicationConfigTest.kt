@@ -9,6 +9,7 @@ import io.openchat.data.mock.ThemeMode
 import io.openchat.data.mock.UiSimState
 import io.openchat.navigation.OpenChatDestination
 import io.openchat.ui.theme.OpenChatIcons
+import io.openchat.ui.theme.OpenChatMotion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -134,11 +135,16 @@ class ApplicationConfigTest {
         assertEquals(9, LocalMockRepository.codexPets.size)
         assertEquals(7, LocalMockRepository.voicePresets.size)
         assertEquals(14, OpenChatDestination.entries.size)
+        assertEquals(0.9f, OpenChatMotion.DEFAULT_SPATIAL_DAMPING, 0.001f)
+        assertEquals(700.0f, OpenChatMotion.DEFAULT_SPATIAL_STIFFNESS, 0.01f)
     }
 
     @Test
     fun temporaryChatAndVoiceCaptionsToggleCleanly() {
         val controller = FakeStateController()
+        assertEquals("conv-greeting", controller.state.value.activeConversationId)
+        assertEquals(ThemeMode.DARK, controller.state.value.themeMode)
+        assertFalse(controller.state.value.isWebSearchEnabled)
         assertFalse(controller.state.value.isTemporaryChat)
         controller.toggleTemporaryChat()
         assertTrue(controller.state.value.isTemporaryChat)
