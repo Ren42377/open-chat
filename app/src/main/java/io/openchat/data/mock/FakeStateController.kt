@@ -357,6 +357,52 @@ class FakeStateController {
         }
     }
 
+    fun toggleTemporaryChat() {
+        _state.update {
+            val next = !it.isTemporaryChat
+            it.copy(
+                isTemporaryChat = next,
+                activeConversationMode = if (next) ConversationMode.TEMPORARY else ConversationMode.DEFAULT,
+            )
+        }
+    }
+
+    fun deleteConversation(conversationId: String) {
+        _state.update { current ->
+            val remaining = current.conversations.filterNot { it.id == conversationId }
+            val nextActiveId = if (current.activeConversationId == conversationId) {
+                remaining.firstOrNull()?.id ?: ""
+            } else {
+                current.activeConversationId
+            }
+            current.copy(
+                conversations = remaining,
+                activeConversationId = nextActiveId,
+                lastStatusBanner = "Conversation deleted",
+            )
+        }
+    }
+
+    fun renameConversation(conversationId: String, newTitle: String) {
+        val clean = newTitle.trim()
+        if (clean.isEmpty()) return
+        _state.update { current ->
+            current.copy(
+                conversations = current.conversations.map {
+                    if (it.id == conversationId) it.copy(title = clean) else it
+                },
+            )
+        }
+    }
+
+    fun toggleVoiceCaptions() {
+        _state.update { it.copy(isVoiceCaptionsEnabled = !it.isVoiceCaptionsEnabled) }
+    }
+
+    fun showToastBanner(message: String) {
+        _state.update { it.copy(lastStatusBanner = message) }
+    }
+
     fun selectArtifactCategory(category: ArtifactCategory) {
         _state.update { it.copy(selectedArtifactCategory = category) }
     }

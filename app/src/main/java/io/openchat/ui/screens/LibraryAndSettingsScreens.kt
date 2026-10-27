@@ -411,8 +411,8 @@ fun DiscoveryHubScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SectionHeader(
-                title = "Explore GPTs (Gizmo Store & Discovery Hub)",
-                subtitle = "Custom versions of Open Chat that combine instructions, extra knowledge, and skills.",
+                title = "Explore GPTs",
+                subtitle = "Custom versions of ChatGPT that combine instructions, extra knowledge, and skills.",
             )
 
             Row(
@@ -501,8 +501,8 @@ fun DiscoveryHubScreen(
 
             // Apps, Plugins & Bazaar Connectors (`defpackage/yxu.java`, `ygv.java`, `pxu.java`)
             SectionHeader(
-                title = "Apps, Plugins & Bazaar Connectors",
-                subtitle = "Open Chat can access information from connected apps, based on what you're authorized to view.",
+                title = "Connected Apps & Connectors",
+                subtitle = "ChatGPT can access information from connected apps, based on what you're authorized to view.",
             )
 
             snapshot.connectors.forEach { conn ->
@@ -597,7 +597,7 @@ fun SpacesAndTasksScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SectionHeader(
-                title = "Spaces & Projects (Snorlax)",
+                title = "Projects",
                 subtitle = "Dedicated project workspaces with custom instructions, sources, and collaborators.",
             )
 
@@ -1001,7 +1001,7 @@ fun SettingsAndProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Text(
-                            text = "Synthesized Memory Summary (rcv.java)",
+                            text = "Synthesized Memory Summary",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                         )

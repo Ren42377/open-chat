@@ -5,22 +5,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,6 +106,7 @@ fun resolveDestinationFromDeepLink(path: String?): OpenChatDestination {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpenChatApp(
     controller: FakeStateController,
@@ -105,6 +114,7 @@ fun OpenChatApp(
 ) {
     val snapshot by controller.state.collectAsState()
     var currentDestination by remember { mutableStateOf(initialDestination) }
+    var showDebugSheet by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
@@ -114,6 +124,7 @@ fun OpenChatApp(
     ) {
         ModalNavigationDrawer(
             drawerState = drawerState,
+            gesturesEnabled = currentDestination != OpenChatDestination.VOICE_CALL,
             drawerContent = {
                 NavigationDrawerContent(
                     snapshot = snapshot,
@@ -130,89 +141,75 @@ fun OpenChatApp(
         ) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
+                containerColor = MaterialTheme.colorScheme.background,
                 topBar = {
+                    val usesCustomScreenChrome = currentDestination == OpenChatDestination.CONVERSATION ||
+                        currentDestination == OpenChatDestination.VOICE_CALL
+
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .statusBarsPadding(),
                     ) {
-                        val activeConversation = snapshot.activeConversation
-                        val headerTitle = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                            activeConversation?.title ?: currentDestination.title
-                        } else {
-                            currentDestination.title
-                        }
-                        val headerSubtitle = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                            "${snapshot.selectedModelSlug} | ${snapshot.activeConversationMode.label} | ${snapshot.subscriptionTier.label}"
-                        } else {
-                            "${currentDestination.subtitle} (${currentDestination.deepLinkPath})"
-                        }
-
-                        TopScreenHeader(
-                            title = headerTitle,
-                            subtitle = headerSubtitle,
-                            onOpenDrawer = {
-                                coroutineScope.launch { drawerState.open() }
-                            },
-                            onOpenInspector = {
-                                currentDestination = OpenChatDestination.EXPERIMENT_INSPECTOR
-                            },
-                            trailingActionIcon = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                                OpenChatIcons.Pencil
-                            } else {
-                                OpenChatIcons.ChatBubble
-                            },
-                            trailingActionDescription = if (currentDestination == OpenChatDestination.CONVERSATION) {
-                                "New chat"
-                            } else {
-                                "Back to chat"
-                            },
-                            onTrailingAction = {
-                                if (currentDestination == OpenChatDestination.CONVERSATION) {
-                                    controller.startNewChat()
-                                } else {
+                        if (!usesCustomScreenChrome) {
+                            TopScreenHeader(
+                                title = currentDestination.title,
+                                subtitle = null,
+                                showBackArrow = true,
+                                onNavigateBack = {
                                     currentDestination = OpenChatDestination.CONVERSATION
-                                }
-                            },
-                        )
-
-                        QuickStateSwitcherBar(
-                            currentState = snapshot.uiSimState,
-                            currentTier = snapshot.subscriptionTier,
-                            onSelectState = { state -> controller.setUiSimState(state) },
-                            onSelectTier = { tier -> controller.setSubscriptionTier(tier) },
-                            onOpenFullInspector = {
-                                currentDestination = OpenChatDestination.EXPERIMENT_INSPECTOR
-                            },
-                        )
+                                },
+                                onOpenDrawer = {
+                                    coroutineScope.launch { drawerState.open() }
+                                },
+                                onOpenInspector = {
+                                    showDebugSheet = true
+                                },
+                                trailingActionIcon = OpenChatIcons.ComposeNewChat,
+                                trailingActionDescription = "New chat",
+                                onTrailingAction = {
+                                    controller.startNewChat()
+                                    currentDestination = OpenChatDestination.CONVERSATION
+                                },
+                            )
+                        }
 
                         AnimatedVisibility(visible = snapshot.lastStatusBanner != null) {
                             val bannerText = snapshot.lastStatusBanner.orEmpty()
-                            Surface(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.fillMaxWidth(),
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center,
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                                    shape = RoundedCornerShape(24.dp),
+                                    shadowElevation = 2.dp,
+                                    modifier = Modifier.clickable { controller.clearStatusBanner() },
                                 ) {
-                                    Text(
-                                        text = bannerText,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    IconButton(onClick = { controller.clearStatusBanner() }) {
-                                        DsIcon(
-                                            drawableRes = OpenChatIcons.StopFill,
-                                            contentDescription = "Dismiss notification",
-                                            size = 16.dp,
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = bannerText,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Medium,
                                         )
+                                        IconButton(
+                                            onClick = { controller.clearStatusBanner() },
+                                            modifier = Modifier.height(20.dp),
+                                        ) {
+                                            DsIcon(
+                                                drawableRes = OpenChatIcons.CloseX,
+                                                contentDescription = "Dismiss notification",
+                                                size = 14.dp,
+                                                tint = MaterialTheme.colorScheme.inverseOnSurface,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -230,11 +227,20 @@ fun OpenChatApp(
                             snapshot = snapshot,
                             controller = controller,
                             onNavigate = { currentDestination = it },
+                            onOpenDrawer = {
+                                coroutineScope.launch { drawerState.open() }
+                            },
+                            onOpenDebugSheet = {
+                                showDebugSheet = true
+                            },
                         )
 
                         OpenChatDestination.VOICE_CALL -> VoiceCallScreen(
                             snapshot = snapshot,
                             controller = controller,
+                            onEndCall = {
+                                currentDestination = OpenChatDestination.CONVERSATION
+                            },
                         )
 
                         OpenChatDestination.CAMERA_SKETCH -> CameraSketchScreen(
@@ -317,6 +323,52 @@ fun OpenChatApp(
                                 currentDestination = destination
                             },
                         )
+                    }
+                }
+            }
+
+            if (showDebugSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showDebugSheet = false },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text = "Developer State & Tier Simulator",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "Hidden from the main UI. Triggered by long-pressing any screen title or via the menu.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        QuickStateSwitcherBar(
+                            currentState = snapshot.uiSimState,
+                            currentTier = snapshot.subscriptionTier,
+                            onSelectState = { state -> controller.setUiSimState(state) },
+                            onSelectTier = { tier -> controller.setSubscriptionTier(tier) },
+                            onOpenFullInspector = {
+                                showDebugSheet = false
+                                currentDestination = OpenChatDestination.EXPERIMENT_INSPECTOR
+                            },
+                        )
+                        Button(
+                            onClick = {
+                                showDebugSheet = false
+                                currentDestination = OpenChatDestination.EXPERIMENT_INSPECTOR
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Open Full Experiment Override & Icon Catalog")
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

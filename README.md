@@ -15,9 +15,9 @@ Open Chat (`io.openchat`) is an open-source, clean-room Android UI/UX reconstruc
 ## Project Highlights
 
 - **100% Cloud-Compiled Workflow:** No local JDK, Android SDK, NDK, or Gradle installation is required or used on contributor machines. All compilation, lint verification, unit testing, and APK packaging run exclusively in GitHub Actions.
-- **Deterministic Reference Extraction:** `.github/workflows/decompile.yml` runs pinned versions of Apktool (`3.0.3`) and JADX (`1.5.6`) in GitHub Actions to produce downloadable reference artifacts (`decompiled_ref-manifest-res` and `decompiled_ref-sources`) kept strictly in `.gitignore` (`_decompiled_ref/`).
-- **Complete 14-Destination Feature Coverage:** Implements all core, library, settings, and hidden/experimental screens discovered in the reference APK, backed by 24 toggleable feature flags (all enabled by default) and 48 clean-room `ds_*` vector icons.
-- **Runtime State Simulation & Experiment Override:** Every screen supports live switching between `Success`, `Loading`, `Empty`, and `Error` states and `Free`, `Go`, `Plus`, `Pro`, `Business`, and `Enterprise` subscription tiers via the top `QuickStateSwitcherBar` or the full `Experiment Override & Inspector` screen (`f6v.java`).
+- **Deterministic Reference Extraction:** `.github/workflows/decompile.yml` runs pinned versions of Apktool (`3.0.3`), JADX (`1.5.6`), and zstd module decompression in GitHub Actions to produce downloadable reference artifacts (`decompiled_ref-manifest-res`, `decompiled_ref-sources`, and `decompiled_ref-assets`) kept strictly in `.gitignore` (`_decompiled_ref/`).
+- **Complete 14-Destination Feature Coverage:** Implements all core, library, settings, and hidden/experimental screens discovered in the reference APK, backed by 24 toggleable feature flags (all enabled by default) and 84 `ds_*` vector icons.
+- **Runtime State Simulation & Experiment Override:** Every screen supports live switching between `Success`, `Loading`, `Empty`, and `Error` states and `Free`, `Go`, `Plus`, `Pro`, `Business`, and `Enterprise` subscription tiers via the hidden developer sheet (accessible by long-pressing any screen header title or via the menu) or the full `Experiment Override & Inspector` screen (`f6v.java`).
 
 ## Reconstructed Screens & Deep Links
 
@@ -36,7 +36,7 @@ Open Chat (`io.openchat`) is an open-source, clean-room Android UI/UX reconstruc
 | **F4** | Open Chat with Friends (Calpico) | `CALPICO_SOCIAL` | `/calpico` | Multi-user group threads, magic invite link sharing, message requests, assistant auto-response toggle |
 | **F4** | Finances, Wallet, Shopping & Sports | `FINANCE_AND_VERTICALS` | `/finances` | Net worth dashboard, Wallet instant checkout approval, Shopping Virtual Try-On, Live Sports (`/football`) |
 | **F4** | Locked Chats Vault & Family Safety | `LOCKED_CHATS_AND_SAFETY` | `/parentalcontrols` | Account PIN vault (`2468`), `Lockdown Mode`, `Daybreak` break reminders, `Parental Controls`, `Trusted Contact` |
-| **F4** | Experiment Override & Inspector | `EXPERIMENT_INSPECTOR` | `/experiments` | Clean-room `f6v.java` override console: 24 feature flags, 14-route jumper, state/tier overrides, 48-icon catalog |
+| **F4** | Experiment Override & Inspector | `EXPERIMENT_INSPECTOR` | `/experiments` | Clean-room `f6v.java` override console: 24 feature flags, 14-route jumper, state/tier overrides, 84-icon catalog |
 
 ## Quickstart
 
@@ -78,7 +78,7 @@ gh run download <decompile-run-id> -n decompiled_ref-sources -D _decompiled_ref/
 | Phase | Scope | Status |
 |---|---|---|
 | **F0 - Foundation** | Repository setup, `.gitignore`, `ci.yml`, `decompile.yml`, base documentation, MIT license | Completed |
-| **F1 - Design System** | Extracted color palette, 12 accents, typography, shapes, dimensions, spatial springs, 48 `ds_*` vector icons, `LocalMockRepository`, `FakeStateController` | Completed |
+| **F1 - Design System** | Extracted `OAI_LIGHT_COLOR_PALETTE` & `OAI_DARK_COLOR_PALETTE`, 12 accents, typography, shapes, dimensions, spatial springs, 84 `ds_*` vector icons, `LocalMockRepository`, `FakeStateController` | Completed |
 | **F2 - Core Screens** | Navigation drawer, conversation stream, `Variants In Stream`, 7-mode composer, Realtime Voice (`Voice Debug`), Camera & Sketch studio | Completed |
 | **F3 - Library and Settings** | Artifact Library, `Pages`, `Sites Lite` analytics, Discovery Hub (`Gizmos` & `Bazaar`), `Spaces`, `Scheduled Tasks`, Settings, `Clinician Mode`, Subscriptions, Passkeys | Completed |
 | **F4 - Hidden and Beta Screens** | `Codex Remote Next`, 9 `Companion Pets`, `Orbit Dots` (`Tibro`), `Calpico`, `Finances`, `Wallet`, `Shopping Try-On`, `Sports`, `Locked Chats`, `Parental Controls`, `Experiment Override` | Completed |

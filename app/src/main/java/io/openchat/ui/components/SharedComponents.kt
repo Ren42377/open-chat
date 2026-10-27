@@ -5,8 +5,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.openchat.data.mock.SubscriptionTier
 import io.openchat.data.mock.UiSimState
 import io.openchat.ui.theme.OpenChatDimens
@@ -51,7 +54,7 @@ fun DsIcon(
     @DrawableRes drawableRes: Int,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    size: Dp = 20.dp,
+    size: Dp = 22.dp,
     tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     Icon(
@@ -78,7 +81,7 @@ fun StatusBadge(
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
         )
     }
@@ -121,26 +124,32 @@ fun SectionHeader(
     }
 }
 
+/**
+ * Clean OAI secondary screen header matching `oai_ui` / Valdi screen headers.
+ * Long-pressing the title opens the hidden Developer / State Inspector overlay.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TopScreenHeader(
     title: String,
     subtitle: String? = null,
     onOpenDrawer: () -> Unit,
     onOpenInspector: () -> Unit,
+    showBackArrow: Boolean = true,
+    onNavigateBack: (() -> Unit)? = null,
     trailingActionIcon: Int? = null,
     trailingActionDescription: String? = null,
     onTrailingAction: (() -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp,
+        color = MaterialTheme.colorScheme.background,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(OpenChatDimens.AppBarSmallHeight)
-                .padding(horizontal = 12.dp),
+                .height(56.dp)
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -148,19 +157,38 @@ fun TopScreenHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f),
             ) {
-                IconButton(onClick = onOpenDrawer) {
-                    DsIcon(
-                        drawableRes = OpenChatIcons.Book,
-                        contentDescription = "Navigation menu",
-                        size = 22.dp,
-                    )
+                if (showBackArrow && onNavigateBack != null) {
+                    IconButton(onClick = onNavigateBack) {
+                        DsIcon(
+                            drawableRes = OpenChatIcons.ArrowLeft,
+                            contentDescription = "Back",
+                            size = 24.dp,
+                        )
+                    }
+                } else {
+                    IconButton(onClick = onOpenDrawer) {
+                        DsIcon(
+                            drawableRes = OpenChatIcons.SidebarMenu,
+                            contentDescription = "Menu",
+                            size = 24.dp,
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                Column {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = onOpenInspector,
+                        )
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                ) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -175,22 +203,12 @@ fun TopScreenHeader(
                     }
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (trailingActionIcon != null && onTrailingAction != null) {
-                    IconButton(onClick = onTrailingAction) {
-                        DsIcon(
-                            drawableRes = trailingActionIcon,
-                            contentDescription = trailingActionDescription,
-                            size = 22.dp,
-                        )
-                    }
-                }
-                IconButton(onClick = onOpenInspector) {
+            if (trailingActionIcon != null && onTrailingAction != null) {
+                IconButton(onClick = onTrailingAction) {
                     DsIcon(
-                        drawableRes = OpenChatIcons.Flask,
-                        contentDescription = "Experiment Override & State Inspector",
+                        drawableRes = trailingActionIcon,
+                        contentDescription = trailingActionDescription,
                         size = 22.dp,
-                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -198,6 +216,9 @@ fun TopScreenHeader(
     }
 }
 
+/**
+ * Developer State Switcher bar - only shown inside the hidden Debug Sheet or Experiment Override screen.
+ */
 @Composable
 fun QuickStateSwitcherBar(
     currentState: UiSimState,
@@ -209,12 +230,13 @@ fun QuickStateSwitcherBar(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        shape = RoundedCornerShape(12.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -254,7 +276,7 @@ fun QuickStateSwitcherBar(
                 )
             }
             OutlinedButton(onClick = onOpenFullInspector) {
-                Text(text = "All Flags & Routes", style = MaterialTheme.typography.labelSmall)
+                Text(text = "Experiment Override", style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -267,13 +289,13 @@ fun QuickStateSwitcherBar(
 @Composable
 fun StateSimulationHost(
     state: UiSimState,
-    loadingTitle: String = "Loading...",
+    loadingTitle: String = "Loading",
     emptyTitle: String = "No items yet",
     emptySubtitle: String = "Items you create or receive will appear here.",
     emptyActionLabel: String? = null,
     onEmptyAction: (() -> Unit)? = null,
-    errorTitle: String = "Something went wrong",
-    errorSubtitle: String = "Check your connection and try again.",
+    errorTitle: String = "Something went wrong.",
+    errorSubtitle: String = "Network error. Please check your internet connection and try again.",
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -296,15 +318,14 @@ fun StateSimulationHost(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        CircularProgressIndicator()
-                        Text(
-                            text = loadingTitle,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            strokeWidth = 2.5.dp,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "Simulating asynchronous loading state via FakeStateController",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = loadingTitle,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -315,52 +336,46 @@ fun StateSimulationHost(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(32.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(OpenChatDimens.CardCornerRadius),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                        modifier = Modifier.fillMaxWidth(),
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                DsIcon(
-                                    drawableRes = OpenChatIcons.Folder,
-                                    contentDescription = null,
-                                    size = 24.dp,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
+                            DsIcon(
+                                drawableRes = OpenChatIcons.Folder,
+                                contentDescription = null,
+                                size = 24.dp,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Text(
+                            text = emptyTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = emptySubtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (emptyActionLabel != null && onEmptyAction != null) {
+                                Button(onClick = onEmptyAction) {
+                                    Text(text = emptyActionLabel)
+                                }
                             }
-                            Text(
-                                text = emptyTitle,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Text(
-                                text = emptySubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                if (emptyActionLabel != null && onEmptyAction != null) {
-                                    Button(onClick = onEmptyAction) {
-                                        Text(text = emptyActionLabel)
-                                    }
-                                }
-                                OutlinedButton(onClick = onRetry) {
-                                    Text(text = "Restore Sample Data")
-                                }
+                            OutlinedButton(onClick = onRetry) {
+                                Text(text = "Done")
                             }
                         }
                     }
@@ -371,17 +386,17 @@ fun StateSimulationHost(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(32.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Surface(
                         shape = RoundedCornerShape(OpenChatDimens.CardCornerRadius),
-                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.error.copy(alpha = 0.4f),
+                                color = MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(OpenChatDimens.CardCornerRadius),
                             ),
                     ) {
@@ -393,7 +408,7 @@ fun StateSimulationHost(
                             DsIcon(
                                 drawableRes = OpenChatIcons.StarOfLife,
                                 contentDescription = "Error",
-                                size = 28.dp,
+                                size = 24.dp,
                                 tint = MaterialTheme.colorScheme.error,
                             )
                             Text(
@@ -407,7 +422,7 @@ fun StateSimulationHost(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Button(onClick = onRetry) {
-                                Text(text = "Retry")
+                                Text(text = "Try again")
                             }
                         }
                     }

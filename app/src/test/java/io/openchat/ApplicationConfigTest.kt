@@ -129,10 +129,22 @@ class ApplicationConfigTest {
 
     @Test
     fun iconCatalogAndMockCollectionsAreComplete() {
-        assertEquals(48, OpenChatIcons.AllCatalog.size)
+        assertEquals(84, OpenChatIcons.AllCatalog.size)
         assertEquals(6, LocalMockRepository.models.size)
         assertEquals(9, LocalMockRepository.codexPets.size)
         assertEquals(7, LocalMockRepository.voicePresets.size)
         assertEquals(14, OpenChatDestination.entries.size)
+    }
+
+    @Test
+    fun temporaryChatAndVoiceCaptionsToggleCleanly() {
+        val controller = FakeStateController()
+        assertFalse(controller.state.value.isTemporaryChat)
+        controller.toggleTemporaryChat()
+        assertTrue(controller.state.value.isTemporaryChat)
+
+        assertTrue(controller.state.value.isVoiceCaptionsEnabled)
+        controller.toggleVoiceCaptions()
+        assertFalse(controller.state.value.isVoiceCaptionsEnabled)
     }
 }

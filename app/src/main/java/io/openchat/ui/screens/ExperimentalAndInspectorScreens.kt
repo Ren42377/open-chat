@@ -76,7 +76,7 @@ fun CodexRemoteScreen(
         ) {
             SectionHeader(
                 title = "Build with Codex, wherever you go",
-                subtitle = "Start coding tasks in a cloud environment or pair with your desktop computer (m1v, bmp0).",
+                subtitle = "Start coding tasks in a cloud environment or pair with your desktop computer.",
             )
 
             // Desktop QR / Code Pairing Card (`strings.xml#L1486-L1509`)
@@ -324,7 +324,7 @@ fun CodexRemoteScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = "Remote Composer Commands (strings.xml#L1318-L1320)",
+                        text = "Remote Composer Commands",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -378,8 +378,8 @@ fun OrbitTibroScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SectionHeader(
-                title = "Orbit / Tibro: Always-On Dots",
-                subtitle = "Reconstructed from TibroPrimaryRoute, Dots (wbv), Ideas (xbv), and You (zbv).",
+                title = "Always-On Dots",
+                subtitle = "Configure your always-on Dot agent, review proactive ideas, and manage approval policies.",
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -511,7 +511,7 @@ fun OrbitTibroScreen(
 
                 "Ideas" -> {
                     SectionHeader(
-                        title = "Ideas Feed (xbv.java)",
+                        title = "Ideas Feed",
                         subtitle = "Proactive tasks synthesized from your calendar, inbox, and repositories.",
                     )
                     dot.ideasFeed.forEach { idea ->
@@ -533,7 +533,7 @@ fun OrbitTibroScreen(
 
                 "You" -> {
                     SectionHeader(
-                        title = "Custom Rules & Approval Policies (zbv.java)",
+                        title = "Custom Rules & Approval Policies",
                         subtitle = "Your dot knows when to take action, and when to ask for approval.",
                     )
                     Row(
@@ -601,8 +601,8 @@ fun CalpicoSocialScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SectionHeader(
-                title = "Open Chat with Friends (Calpico)",
-                subtitle = "Direct messages and group chats with magic links and custom assistant personalities (uyu, e0v, i0v).",
+                title = "Chat with Friends",
+                subtitle = "Direct messages and group chats with magic links and custom assistant personalities.",
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -708,7 +708,7 @@ fun FinanceAndVerticalsScreen(
             // Finances Dashboard (`defpackage/f7v.java`)
             SectionHeader(
                 title = "Finances & Net Worth Dashboard",
-                subtitle = "Securely connect your financial accounts and get personalized insights (f7v.java).",
+                subtitle = "Securely connect your financial accounts and get personalized insights.",
                 actionLabel = if (snapshot.isFinanceBalanceHidden) "Show balances" else "Hide balances",
                 onActionClick = { controller.toggleFinanceBalanceHidden() },
             )
@@ -774,7 +774,7 @@ fun FinanceAndVerticalsScreen(
             // Wallet & Purchase Approval (`defpackage/xpv.java`, `WalletVgsCardScanActivity`)
             SectionHeader(
                 title = "Wallet & Secure Checkout Approval",
-                subtitle = "Manage payment methods, scan cards, and approve in-chat purchases (xpv.java).",
+                subtitle = "Manage payment methods, scan cards, and approve in-chat purchases.",
             )
 
             snapshot.walletCards.forEach { card ->
@@ -968,7 +968,7 @@ fun LockedChatsAndSafetyScreen(
             // Locked Chats Account PIN Vault (`nbv.java`, `qbv.java`)
             SectionHeader(
                 title = "Locked Chats & Account PIN Vault",
-                subtitle = "Once locked, new messages in that chat won't contribute to general memory (nbv, qbv).",
+                subtitle = "Once locked, new messages in that chat won't contribute to general memory.",
             )
 
             Surface(
@@ -1348,9 +1348,9 @@ fun ExperimentInspectorScreen(
 
         HorizontalDivider()
 
-        // Design System Token & 48-Icon Vector Catalog
+        // Design System Token & 84-Icon Vector Catalog
         SectionHeader(
-            title = "Design System Tokens & 48 Vector Drawables",
+            title = "Design System Tokens & ${OpenChatIcons.AllCatalog.size} Vector Drawables",
             subtitle = "Spring damping=${OpenChatMotion.DEFAULT_SPATIAL_DAMPING}, stiffness=${OpenChatMotion.DEFAULT_SPATIAL_STIFFNESS} | Max width=${OpenChatDimens.ConstraintWidthMax.value.toInt()}dp",
             actionLabel = if (showIconCatalog) "Hide Icons" else "Show Icons",
             onActionClick = { showIconCatalog = !showIconCatalog },
