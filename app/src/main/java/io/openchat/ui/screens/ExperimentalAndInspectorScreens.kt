@@ -260,8 +260,8 @@ fun CodexRemoteScreen(
                         // Terminal Output
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = OpenChatPalette.Neutral10,
-                            contentColor = OpenChatPalette.Neutral95,
+                            color = OpenChatPalette.DarkBgDrawer,
+                            contentColor = OpenChatPalette.DarkTextPrimary,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Column(
@@ -272,7 +272,7 @@ fun CodexRemoteScreen(
                                     Text(
                                         text = line,
                                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                                        color = OpenChatPalette.Neutral95,
+                                        color = OpenChatPalette.DarkTextPrimary,
                                     )
                                 }
                             }

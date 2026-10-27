@@ -476,7 +476,7 @@ fun NavigationDrawerContent(
                 if (showMoreFeatures) {
                     item {
                         DrawerMenuRow(
-                            iconRes = OpenChatIcons.Calendar,
+                            iconRes = OpenChatIcons.Notebook,
                             label = "Scheduled tasks",
                             selected = currentDestination == OpenChatDestination.SPACES_AND_TASKS,
                             selectedColor = selectedRowColor,
@@ -489,7 +489,7 @@ fun NavigationDrawerContent(
                     if (snapshot.isFlagEnabled("feature_calpico_social_chat")) {
                         item {
                             DrawerMenuRow(
-                                iconRes = OpenChatIcons.GroupPerson,
+                                iconRes = OpenChatIcons.Person2,
                                 label = "Chat with friends",
                                 selected = currentDestination == OpenChatDestination.CALPICO_SOCIAL,
                                 selectedColor = selectedRowColor,
@@ -1290,7 +1290,7 @@ fun ConversationScreen(
                         },
                     )
                     AttachmentTileButton(
-                        iconRes = OpenChatIcons.ImageSquare,
+                        iconRes = OpenChatIcons.Photo,
                         label = "Photos",
                         modifier = Modifier.weight(1f),
                         onClick = {
@@ -1678,7 +1678,7 @@ private fun AuthenticMessageItem(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         DsIcon(
-                            drawableRes = OpenChatIcons.ImageSquare,
+                            drawableRes = OpenChatIcons.Photo,
                             contentDescription = null,
                             size = 16.dp,
                         )
@@ -2471,9 +2471,9 @@ fun VoiceCallScreen(
                                     )
                                 } else {
                                     listOf(
-                                        OpenChatPalette.VoiceOrbLightBlue,
-                                        OpenChatPalette.VoiceOrbMidBlue,
-                                        OpenChatPalette.VoiceOrbDeepBlue,
+                                        OpenChatPalette.VoiceSkyLight,
+                                        OpenChatPalette.VoiceAccentBlue,
+                                        OpenChatPalette.VoiceDeepBlue,
                                     )
                                 },
                             ),
@@ -2515,7 +2515,7 @@ fun VoiceCallScreen(
                             Text(
                                 text = "Voice Debug Telemetry (OrbitVoiceCallActivity)",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = OpenChatPalette.VoiceOrbLightBlue,
+                                color = OpenChatPalette.VoiceSkyLight,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text("Session: vsess_94a8bc01e2 | WebRTC Opus 48kHz", style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
@@ -2802,7 +2802,7 @@ fun CameraSketchScreen(
 
             Surface(
                 shape = RoundedCornerShape(OpenChatDimens.CardCornerRadius),
-                color = OpenChatPalette.Pi2DefaultBackground,
+                color = OpenChatPalette.DarkBgDrawer,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp)

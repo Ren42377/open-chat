@@ -97,7 +97,7 @@ enum class OpenChatDestination(
         subtitle = "Group chats, magic links, requests & fun facts",
         deepLinkPath = "/calpico",
         phaseBadge = "F4",
-        iconRes = OpenChatIcons.GroupPerson,
+        iconRes = OpenChatIcons.Person2,
     ),
     FINANCE_AND_VERTICALS(
         route = "finance_and_verticals",
