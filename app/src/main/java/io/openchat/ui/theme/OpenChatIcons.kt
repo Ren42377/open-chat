@@ -90,7 +90,9 @@ object OpenChatIcons {
     @DrawableRes val Suitcase = R.drawable.ds_suitcase_regular_24
     @DrawableRes val Telescope = R.drawable.ds_telescope_regular_24
     @DrawableRes val Terminal = R.drawable.ds_terminal_regular_24
+    @DrawableRes val ThumbDownFilled = R.drawable.ds_thumb_down_fill_regular_24
     @DrawableRes val ThumbDown = R.drawable.ds_thumb_down_regular_24
+    @DrawableRes val ThumbUpFilled = R.drawable.ds_thumb_up_fill_regular_24
     @DrawableRes val ThumbUp = R.drawable.ds_thumb_up_regular_24
     @DrawableRes val Trash = R.drawable.ds_trash_regular_24
     @DrawableRes val Video = R.drawable.ds_video_regular_24
@@ -176,7 +178,9 @@ object OpenChatIcons {
         DesignSystemIconEntry("ds_suitcase_regular_24", "Work Mode", Suitcase),
         DesignSystemIconEntry("ds_telescope_regular_24", "Deep Research", Telescope),
         DesignSystemIconEntry("ds_terminal_regular_24", "Terminal / CLI", Terminal),
+        DesignSystemIconEntry("ds_thumb_down_fill_regular_24", "Bad Response Filled", ThumbDownFilled),
         DesignSystemIconEntry("ds_thumb_down_regular_24", "Bad Response", ThumbDown),
+        DesignSystemIconEntry("ds_thumb_up_fill_regular_24", "Good Response Filled", ThumbUpFilled),
         DesignSystemIconEntry("ds_thumb_up_regular_24", "Good Response", ThumbUp),
         DesignSystemIconEntry("ds_trash_regular_24", "Delete", Trash),
         DesignSystemIconEntry("ds_video_regular_24", "Live Video", Video),

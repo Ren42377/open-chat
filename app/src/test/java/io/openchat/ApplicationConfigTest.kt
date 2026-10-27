@@ -130,7 +130,7 @@ class ApplicationConfigTest {
 
     @Test
     fun iconCatalogAndMockCollectionsAreComplete() {
-        assertEquals(84, OpenChatIcons.AllCatalog.size)
+        assertEquals(86, OpenChatIcons.AllCatalog.size)
         assertEquals(6, LocalMockRepository.models.size)
         assertEquals(9, LocalMockRepository.codexPets.size)
         assertEquals(7, LocalMockRepository.voicePresets.size)
